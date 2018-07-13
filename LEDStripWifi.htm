@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>LED Strip Control</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<script type="text/javascript" language="javascript">
+<!--
+function updateAll()
+{
+  for(var i=0; i<8; i++)
+  {
+    updateColor(i);
+  }
+}
+function updateColor(idx)
+{
+  var target = document.getElementById("blk"+idx);
+  var r = parseInt(document.getElementById("c"+idx+"r").value)*2;
+  var g = parseInt(document.getElementById("c"+idx+"g").value)*2;
+  var b = parseInt(document.getElementById("c"+idx+"b").value)*2;
+  target.style.backgroundColor = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+-->
+</script>
+<style type="text/css">
+h1
+{
+  padding-top:20px;
+  margin-bottom:0px;
+}
+.cIn
+{
+  float:left;
+  clear:left;
+}
+.cOut
+{
+  width:20px;
+  height:20px;
+  overflow:visible;
+  float:left;
+}
+.section
+{
+  float:left;
+  margin-right:50px;
+}
+</style>
+</head>
+<body onload="updateAll()">
+  <form action="" method="get">
+  <h1>Colors</h1>
+  <div>
+    <div class="section">
+      <h2>Color Sequence (0-127)</h2>
+      <div class="cIn">
+        <input type="radio" disabled="disabled" />
+        <input type="text" value="R" size="3" disabled="disabled" />
+        <input type="text" value="G" size="3" disabled="disabled" />
+        <input type="text" value="B" size="3" disabled="disabled" />
+      </div>
+      <div class="cIn">
+        <input type="radio" name="color" value="0" />
+        <input type="text" name="c0r" id="c0r" value="127" size="3" onblur="updateColor(0)"/>
+        <input type="text" name="c0g" id="c0g" value="0" size="3" onblur="updateColor(0)"/>
+        <input type="text" name="c0b" id="c0b" value="0" size="3" onblur="updateColor(0)"/>
+      </div>
+      <div id="blk0" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="1" />
+        <input type="text" name="c1r" id="c1r" value="0" size="3" onblur="updateColor(1)"/>
+        <input type="text" name="c1g" id="c1g" value="127" size="3" onblur="updateColor(1)"/>
+        <input type="text" name="c1b" id="c1b" value="0" size="3" onblur="updateColor(1)"/>
+      </div>
+      <div id="blk1" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="2" checked="checked" />
+        <input type="text" name="c2r" id="c2r" value="0" size="3" onblur="updateColor(2)"/>
+        <input type="text" name="c2g" id="c2g" value="0" size="3" onblur="updateColor(2)"/>
+        <input type="text" name="c2b" id="c2b" value="127" size="3" onblur="updateColor(2)"/>
+      </div>
+      <div id="blk2" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="3" checked="checked" />
+        <input type="text" name="c3r" id="c3r" value="0" size="3" onblur="updateColor(3)"/>
+        <input type="text" name="c3g" id="c3g" value="0" size="3" onblur="updateColor(3)"/>
+        <input type="text" name="c3b" id="c3b" value="0" size="3" onblur="updateColor(3)"/>
+      </div>
+      <div id="blk3" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="4" checked="checked" />
+        <input type="text" name="c4r" id="c4r" value="127" size="3" onblur="updateColor(4)"/>
+        <input type="text" name="c4g" id="c4g" value="127" size="3" onblur="updateColor(4)"/>
+        <input type="text" name="c4b" id="c4b" value="0" size="3" onblur="updateColor(4)"/>
+      </div>
+      <div id="blk4" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="5" checked="checked" />
+        <input type="text" name="c5r" id="c5r" value="127" size="3" onblur="updateColor(5)"/>
+        <input type="text" name="c5g" id="c5g" value="0" size="3" onblur="updateColor(5)"/>
+        <input type="text" name="c5b" id="c5b" value="127" size="3" onblur="updateColor(5)"/>
+      </div>
+      <div id="blk5" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="6" checked="checked" />
+        <input type="text" name="c6r" id="c6r" value="0" size="3" onblur="updateColor(6)"/>
+        <input type="text" name="c6g" id="c6g" value="127" size="3" onblur="updateColor(6)"/>
+        <input type="text" name="c6b" id="c6b" value="127" size="3" onblur="updateColor(6)"/>
+      </div>
+      <div id="blk6" class="cOut"></div><br/>
+      <div class="cIn">
+        <input type="radio" name="color" value="7" checked="checked" />
+        <input type="text" name="c7r" id="c7r" value="64" size="3" onblur="updateColor(7)"/>
+        <input type="text" name="c7g" id="c7g" value="64" size="3" onblur="updateColor(7)"/>
+        <input type="text" name="c7b" id="c7b" value="64" size="3" onblur="updateColor(7)"/>
+      </div>
+      <div id="blk7" class="cOut"></div><br/>
+    </div>
+    <div class="section">
+      <h2>Presets</h2>
+      <input type="radio" name="color" value="r" />Rainbow <input type="text" name="rbw" value="160" size="5" />Width<br/>
+      <input type="radio" name="color" value="p0" />Holiday<br/>
+      <input type="radio" name="color" value="p1" />Patriotic<br/>
+      <input type="radio" name="color" value="p2" />Halloween<br/>
+      <input type="radio" name="color" value="p3" />Valentine's<br/>
+      <input type="radio" name="color" value="p4" />Sunset<br/>
+      <input type="radio" name="color" value="p5" />Winter<br/>
+      <input type="radio" name="color" value="p6" />Jungle<br/>
+    </div>
+  </div>
+  <h1 style="clear:both;">Animation</h1>
+  <div>
+    <div class="section">
+      <h2>Style</h2>
+      <input type="radio" name="anim" value="a0" checked="checked" />None<br/>
+      <input type="radio" name="anim" value="a1" />Scroll<br/>
+      <input type="radio" name="anim" value="a2" />Snake<br/>
+      <input type="radio" name="anim" value="a3" />Twinkle <input type="text" name="twinklePer" value="20" size="3" />% on<br/>
+    </div>
+    <div class="section">
+      <h2>Type</h2>
+      <input type="radio" name="patt" value="e0" checked="checked" />Serial<br/>
+      <input type="radio" name="patt" value="e1" />Blocks<br/>
+      <input type="radio" name="patt" value="e2" />Solids<br/>
+    </div>
+    <div class="section">
+      <h2>Transition</h2>
+      <input type="radio" name="tran" value="t0" checked="checked" />None<br/>
+      <input type="radio" name="tran" value="t1" />Pulse<br/>
+      <input type="radio" name="tran" value="t2" />Flash<br/>
+      <input type="radio" name="tran" value="t3" />Fade<br/>
+    </div>
+    <div class="section">
+      <h2>Direction</h2>
+      <input type="radio" name="dir" value="d0" checked="checked" />Left<br/>
+      <input type="radio" name="dir" value="d1" />Right<br/>
+      <input type="radio" name="dir" value="d2" />Out<br/>
+      <input type="radio" name="dir" value="d3" />In<br/>
+    </div>
+    <div class="section">
+      <h2>Timing</h2>
+      <input type="text" name="transT" value="100" size="3" /> Transition (ms)<br/>
+      <input type="text" name="delayT" value="100" size="3" /> Delay (ms)<br/>
+    </div>
+  </div>
+  <div style="clear:both;padding-top:30px;">
+  <input type="checkbox" name="eeprom" />Persist on reboot<br/>
+  <input type="submit" value="Save Settings" style="padding:10px;"/>
+  </div>
+  </form>
+</body>
+</html>
