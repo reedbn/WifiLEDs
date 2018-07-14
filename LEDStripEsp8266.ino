@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <IIRFilter.h>
 #include <pgmspace.h>
+#include <Ticker.h>
 
 //Initialization/hardware config
 #define LEDdataPin           2
@@ -11,15 +12,20 @@
 const char* ssid = "RFish";
 const char* pass = "NotUrFish";
 const IPAddress apIP(192,168,4,1);
+#define STRIP_MAX_REFRESH_HZ 20
 
 #define PRINT_DEBUGGING_LED (0)
 #define PRINT_DEBUGGING_WIFLY (1)
 #define PRINT_DEBUGGING_WIFLY_DETAIL (0)
 
-//Externs
-extern IIRFilter timeScaler;
-extern uint32_t LEDNext[];
-extern Adafruit_NeoPixel strip;
+Ticker stripTicker;
+bool stripLoopAllowed = false;
+void allowStripLoop()
+{
+  stripLoopAllowed = true;
+}
+
+extern volatile bool stripParamsUpdated;
 
 void setup()
 {
@@ -31,39 +37,32 @@ void setup()
 
   //Setup strip
   stripSetup();
+
+  stripTicker.attach(1.0/STRIP_MAX_REFRESH_HZ,allowStripLoop);
 }
 
+uint32_t loop_counter = 0;
 void loop()
 {
-  #if PRINT_DEBUGGING_LED
-  Serial.println(F("Strip Loop..."));
-  #endif
-  //stripLoop();
+  if(stripLoopAllowed){
+    #if PRINT_DEBUGGING_WIFLY_DETAIL
+    Serial.println(F("Strip Loop..."));
+    #endif
+    stripLoop();
+    stripLoopAllowed = false;
+  }
   
   #if PRINT_DEBUGGING_WIFLY_DETAIL
   Serial.println(F("WiFi Loop..."));
   #endif
   wifiLoop();
-}
 
-//This is not an actual interrupt (unfortunately),
-//but a method called after each loop() whenever
-// Serial.available() > 0
-void serialEvent()
-{
-  #if PRINT_DEBUGGING_WIFLY
-  Serial.println(F("Wifi Loop..."));
-  #endif
-  wifiLoop();
-  
-  //Clear the strip, since the pattern might have changed
-  for(int i=0; i<numLEDs; ++i)
-  {
-    strip.setPixelColor(i,0,0,0);
-    LEDNext[i] = 0;
+  if(++loop_counter %100000 == 0){
+    Serial.print(F("Loop "));
+    Serial.println(loop_counter);
   }
-  strip.show();
-  
-  //Reset the IIR filter
-  timeScaler.reset();
+
+  if(stripParamsUpdated){
+    resetStrip();
+  }
 }
