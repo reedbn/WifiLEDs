@@ -28,30 +28,55 @@ h1
   padding-top:20px;
   margin-bottom:0px;
 }
-.cIn
-{
+.cIn{
   float:left;
   clear:left;
 }
-.cOut
-{
-  width:20px;
-  height:20px;
+.cOut{
+  width:20pt;
+  height:20pt;
   overflow:visible;
   float:left;
 }
-.section
-{
-  float:left;
-  margin-right:50px;
+.gridArea{
+  display: grid;
+  grid-template-areas: "colorhead colorhead colorhead colorhead colorhead"
+                       " colorseq  colorseq  colorpre  colorpre  colorpre"
+                       " animhead  animhead  animhead  animhead  animhead"
+                       "animstyle  animtype animtrans   animdir  animtime"
+                       "     save      save      save      save     save";
 }
+@media only screen and (max-width: 700px){
+  .gridArea{
+    grid-template-areas: "colorhead"
+                         "colorseq"
+                         "colorpre"
+                         "animhead"
+                         "animstyle"
+                         "animtype"
+                         "animtrans"
+                         "animdir"
+                         "animtime"
+                         "save";
+  }
+}
+.chead{grid-area: colorhead;}
+.cseq{grid-area: colorseq;}
+.cpre{grid-area: colorpre;}
+.ahead{grid-area: animhead;}
+.astyle{grid-area: animstyle;}
+.atype{grid-area: animtype;}
+.atrans{grid-area: animtrans;}
+.adir{grid-area: animdir;}
+.atime{grid-area: animtime;}
+.savebuttons{grid-area: save; padding-top: 5%}
 </style>
 </head>
 <body onload="updateAll()">
   <form action="" method="get">
-  <h1>Colors</h1>
-  <div>
-    <div class="section">
+  <div class="gridArea">
+    <h1 class="chead">Colors</h1>
+    <div class="cseq">
       <h2>Color Sequence (0-127)</h2>
       <div class="cIn">
         <input type="radio" disabled="disabled" />
@@ -116,7 +141,7 @@ h1
       </div>
       <div id="blk7" class="cOut"></div><br/>
     </div>
-    <div class="section">
+    <div class="cpre">
       <h2>Presets</h2>
       <input type="radio" name="color" value="r" />Rainbow <input type="text" name="rbw" value="160" size="5" />Width<br/>
       <input type="radio" name="color" value="p0" />Holiday<br/>
@@ -127,45 +152,43 @@ h1
       <input type="radio" name="color" value="p5" />Winter<br/>
       <input type="radio" name="color" value="p6" />Jungle<br/>
     </div>
-  </div>
-  <h1 style="clear:both;">Animation</h1>
-  <div>
-    <div class="section">
+    <h1 class="ahead">Animation</h1>
+    <div class="animstyle">
       <h2>Style</h2>
       <input type="radio" name="anim" value="a0" checked="checked" />None<br/>
       <input type="radio" name="anim" value="a1" />Scroll<br/>
       <input type="radio" name="anim" value="a2" />Snake<br/>
       <input type="radio" name="anim" value="a3" />Twinkle <input type="text" name="twinklePer" value="20" size="3" />% on<br/>
     </div>
-    <div class="section">
+    <div class="atype">
       <h2>Type</h2>
       <input type="radio" name="patt" value="e0" checked="checked" />Serial<br/>
       <input type="radio" name="patt" value="e1" />Blocks<br/>
       <input type="radio" name="patt" value="e2" />Solids<br/>
     </div>
-    <div class="section">
+    <div class="atrans">
       <h2>Transition</h2>
       <input type="radio" name="tran" value="t0" checked="checked" />None<br/>
       <input type="radio" name="tran" value="t1" />Pulse<br/>
       <input type="radio" name="tran" value="t2" />Flash<br/>
       <input type="radio" name="tran" value="t3" />Fade<br/>
     </div>
-    <div class="section">
+    <div class="adir">
       <h2>Direction</h2>
       <input type="radio" name="dir" value="d0" checked="checked" />Left<br/>
       <input type="radio" name="dir" value="d1" />Right<br/>
       <input type="radio" name="dir" value="d2" />Out<br/>
       <input type="radio" name="dir" value="d3" />In<br/>
     </div>
-    <div class="section">
+    <div class="atime">
       <h2>Timing</h2>
       <input type="text" name="transT" value="100" size="3" /> Transition (ms)<br/>
       <input type="text" name="delayT" value="100" size="3" /> Delay (ms)<br/>
     </div>
-  </div>
-  <div style="clear:both;padding-top:30px;">
-  <input type="checkbox" name="eeprom" />Persist on reboot<br/>
-  <input type="submit" value="Save Settings" style="padding:10px;"/>
+    <div class="savebuttons">
+      <input type="checkbox" name="eeprom" />Persist on reboot<br/>
+      <input type="submit" value="Save Settings" style="padding:10px;"/>
+    </div>
   </div>
   </form>
 </body>
