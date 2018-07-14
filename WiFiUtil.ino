@@ -324,9 +324,44 @@ void sendIndex()
   sendChunkln(F("target.style.backgroundColor = \"#\" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);}"));
   sendChunkln(F("--></script><style type=\"text/css\">h1{padding-top:20px;margin-bottom:0px;}"));
   sendChunkln(F(".cIn{float:left;clear:left;} .cOut{width:20px;height:20px;overflow:visible;float:left;}"));
-  sendChunkln(F(".section{float:left;margin-right:50px;}</style></head>"));
-  sendChunkln(F("<body onload=\"updateAll()\"><form action=\"\" method=\"post\"><h1>Colors</h1>"));
-  sendChunkln(F("<div><div class=\"section\"><h2>Color Sequence (0-127)</h2>"));
+  sendChunkln(F(".gridArea{"));
+  sendChunkln(F("  display: grid;"));
+  sendChunkln(F("  grid-template-areas: \"colorhead colorhead colorhead colorhead colorhead\""));
+  sendChunkln(F("                       \" colorseq  colorseq  colorpre  colorpre  colorpre\""));
+  sendChunkln(F("                       \" animhead  animhead  animhead  animhead  animhead\""));
+  sendChunkln(F("                       \"animstyle  animtype animtrans   animdir  animtime\""));
+  sendChunkln(F("                       \"     save      save      save      save     save\";"));
+  sendChunkln(F("}"));
+  sendChunkln(F("@media screen and (max-width: 600px),"));
+  sendChunkln(F("       screen and (orientation:portrait){"));
+  sendChunkln(F("  .gridArea{"));
+  sendChunkln(F("    grid-template-areas: \"colorhead\""));
+  sendChunkln(F("                         \"colorseq\""));
+  sendChunkln(F("                         \"colorpre\""));
+  sendChunkln(F("                         \"animhead\""));
+  sendChunkln(F("                         \"animstyle\""));
+  sendChunkln(F("                         \"animtype\""));
+  sendChunkln(F("                         \"animtrans\""));
+  sendChunkln(F("                         \"animdir\""));
+  sendChunkln(F("                         \"animtime\""));
+  sendChunkln(F("                         \"save\";"));
+  sendChunkln(F("  }"));
+  sendChunkln(F("}"));
+  sendChunkln(F(".chead{grid-area: colorhead;}"));
+  sendChunkln(F(".cseq{grid-area: colorseq;}"));
+  sendChunkln(F(".cpre{grid-area: colorpre;}"));
+  sendChunkln(F(".ahead{grid-area: animhead;}"));
+  sendChunkln(F(".astyle{grid-area: animstyle;}"));
+  sendChunkln(F(".atype{grid-area: animtype;}"));
+  sendChunkln(F(".atrans{grid-area: animtrans;}"));
+  sendChunkln(F(".adir{grid-area: animdir;}"));
+  sendChunkln(F(".atime{grid-area: animtime;}"));
+  sendChunkln(F(".savebuttons{grid-area: save; padding-top: 5%}"));
+  sendChunkln(F("</style>"));
+  sendChunkln(F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"));
+  sendChunkln(F("</head>"));
+  sendChunkln(F("<body onload=\"updateAll()\"><form action=\"\" method=\"post\">"));
+  sendChunkln(F("<div class=\"gridArea\"><h1 class=\"chead\">Colors</h1><div class=\"cseq\"><h2>Color Sequence (0-127)</h2>"));
   sendChunkln(F("<div class=\"cIn\"><input type=\"radio\" disabled=\"disabled\" />"));
   sendChunkln(F("<input type=\"text\" value=\"R\" size=\"3\" disabled=\"disabled\" />"));
   sendChunkln(F("<input type=\"text\" value=\"G\" size=\"3\" disabled=\"disabled\" />"));
@@ -371,7 +406,7 @@ void sendIndex()
     sendChunk(currIdx);sendChunkln(F("\" class=\"cOut\"></div><br/>"));
   }
 
-  sendChunkln(F("</div><div class=\"section\"><h2>Presets</h2>"));
+  sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
   sendChunk  (F("<input type=\"text\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunkln(F("\" size=\"5\" />Width<br/>"));
     /*<input type="radio" name="color" value="p0" />Holiday<br/>
@@ -381,40 +416,40 @@ void sendIndex()
       <input type="radio" name="color" value="p4" />Sunset<br/>
       <input type="radio" name="color" value="p5" />Winter<br/>
       <input type="radio" name="color" value="p6" />Jungle<br/>*/
-  sendChunkln(F("</div></div>"));
+  sendChunkln(F("</div>"));
   
   //Animation styles
-  sendChunkln(F("<h1 style=\"clear:both;\">Animation</h1><div><div class=\"section\"><h2>Style</h2>"));
+  sendChunkln(F("<h1 class=\"ahead\">Animation</h1><div class=\"astyle\"><h2>Style</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a0\""));if(animMode==ANIM_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake<br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
   sendChunk  (F("<input type=\"text\" name=\"twinklePer\" value=\""));sendChunk(twinkleThresh);sendChunkln(F("\" size=\"3\" />% on<br/></div>"));
   
-  sendChunkln(F("<div class=\"section\"><h2>Type</h2>"));
+  sendChunkln(F("<div class=\"atype\"><h2>Type</h2>"));
   sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e0\""));if(patternMode==PATTERN_SERIAL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Serial<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e1\""));if(patternMode==PATTERN_BLOCKS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Blocks<br/>"));      
   sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e2\""));if(patternMode==PATTERN_SOLIDS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Solids<br/></div>"));
   
-  sendChunkln(F("<div class=\"section\"><h2>Transition</h2>"));
+  sendChunkln(F("<div class=\"atrans\"><h2>Transition</h2>"));
   sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t0\""));if(transMode==TRANS_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t1\""));if(transMode==TRANS_PULSE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Pulse<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t2\""));if(transMode==TRANS_FLASH){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Flash<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t3\""));if(transMode==TRANS_FADE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Fade<br/></div>"));
   
-  sendChunkln(F("<div class=\"section\"><h2>Direction</h2>"));
+  sendChunkln(F("<div class=\"adir\"><h2>Direction</h2>"));
   sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d0\""));if(dirMode==DIR_L){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Left<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d1\""));if(dirMode==DIR_R){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Right<br/>"));
   /*sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d2\""));if(animMode==DIR_OUT){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Out<br/>"));
     sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d3\""));if(animMode==DIR_IN){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />In<br/>"))*/
   sendChunkln(F("</div>"));
   
-  sendChunkln(F("<div class=\"section\"><h2>Timing</h2>"));
+  sendChunkln(F("<div class=\"atime\"><h2>Timing</h2>"));
   sendChunk  (F("<input type=\"text\" name=\"transT\" value=\""));sendChunk(transTime);sendChunkln(F("\" size=\"3\" /> Transition (ms)<br/>"));
   sendChunk  (F("<input type=\"text\" name=\"delayT\" value=\""));sendChunk(delayTime);sendChunkln(F("\" size=\"3\" /> Delay (ms)<br/></div>"));
-  
-  sendChunkln(F("</div><div style=\"clear:both;padding-top:30px;\">"));
-    /*<input type="checkbox" name="eeprom" />Persist on reboot<br/>*/
+  sendChunkln(F("</div>"));
+  sendChunkln(F("<div class=\"savebuttons\">"));
+  /*sendChunkln(F("<input type=\"checkbox\" name=\"eeprom\" />Persist on reboot<br/>"));*/
   sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;\"/>"));
   sendChunkln(F("</div></form></body></html>"));
   sendChunkln();
