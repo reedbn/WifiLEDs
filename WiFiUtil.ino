@@ -28,6 +28,7 @@ void send404();
 void wifiSetup()
 {
   //Ensure that we're in a reasonable state
+  ESP.eraseConfig();
   WiFi.setAutoConnect(false);
   WiFi.disconnect(true);
   
@@ -36,18 +37,27 @@ void wifiSetup()
   WiFi.softAPConfig(apIP,//Our IP
                     apIP,//Gateway IP
                     IPAddress(255,255,255,0));//Subnet mask
-  WiFi.softAP(ssid,pass);
+  #if PRINT_DEBUGGING_WIFLY
+  debugSerial.println(
+  #endif
+  WiFi.softAP(ssid,pass)
+  #if PRINT_DEBUGGING_WIFLY
+  ? F("SoftAP ready") : F("SoftAP failed"))
+  #endif
+  ;
+  
   IPAddress myIP = WiFi.softAPIP();
   #if PRINT_DEBUGGING_WIFLY
   Serial.print(F("AP IP address: "));
   Serial.println(myIP);
+  #endif
   
   //Set up the web server
   server.on("/", HTTP_GET, handleRootGet);
   server.on("/", HTTP_POST, handleRootPost);
   server.onNotFound(send404);
   server.begin();
-  #endif
+
   #if PRINT_DEBUGGING_WIFLY
   Serial.println(F("Setup Complete"));
   #endif
@@ -86,20 +96,6 @@ void handleRootPost(){
 //Goes through and sets settings when POST received
 void processPost()
 {
-  String message;
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  Serial.println(message);
-  return;
-  
-  //Skip to \r\n\r\n, since that separates the
-  //header from the data
-  Serial.find("\r\n\r\n",4);
-  
-  //Grab everything at once
-  memset(wifiBuff,0,sizeof(wifiBuff));
-  Serial.readBytes(wifiBuff,sizeof(wifiBuff));
   #if PRINT_DEBUGGING_WIFLY
   debugSerial.println(freeRam());
   debugSerial.println(sizeof(wifiBuff));
@@ -107,233 +103,130 @@ void processPost()
   debugSerial.println(wifiBuff);
   #endif
   
-  //Big clunky switch statement to handle actual parsing
-  int idx = 0;
-  while((idx < sizeof(wifiBuff)) && (wifiBuff[idx] != 0))
-  {
-    switch(wifiBuff[idx++])
-    {
-      case 'c':
-      {
-        if(wifiBuff[idx] == 'o')
-        {
-          idx = findIdx(wifiBuff,idx,'=',sizeof(wifiBuff));
-          if(wifiBuff[idx] != 'r')
-          {
-            patternType = PTYPE_SEQ;
-            LEDSeqLen = readInt(wifiBuff,idx++,sizeof(wifiBuff))+1;//Number, not max index
-          }
-          else
-          {
-            patternType = PTYPE_RAINBOW;
-          }
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed co (seq,rbw): ("));
-          debugSerial.print(LEDSeqLen);
-          debugSerial.print(F(","));
-          debugSerial.print(patternType);
-          debugSerial.println(F(")"));
-          #endif
-        }
-        else
-        {
-          int cidx = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          idx = findIdx(wifiBuff,idx,'=',sizeof(wifiBuff));
-          int r = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          idx = findIdx(wifiBuff,idx,'=',sizeof(wifiBuff));
-          int g = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          idx = findIdx(wifiBuff,idx,'=',sizeof(wifiBuff));
-          int b = readInt(wifiBuff,idx,sizeof(wifiBuff));/**/
-          
-          LEDSeq[cidx] = strip.Color(r,g,b);
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed c (cidx,r,g,b): ("));
-          debugSerial.print(cidx);
-          debugSerial.print(",");
-          debugSerial.print(r);
-          debugSerial.print(",");
-          debugSerial.print(g);
-          debugSerial.print(",");
-          debugSerial.print(b);
-          debugSerial.println(")");
-          #endif
-        }
-        break;          
-      }
-      case 'r':
-      {
-        rainbowWidth = readInt(wifiBuff,idx,sizeof(wifiBuff));
-        
-        #if PRINT_DEBUGGING_WIFLY
-        debugSerial.print(F("Processed r: "));
-        debugSerial.println(rainbowWidth);
-        #endif
-        break;
-      }
-      case 'a':
-      {
-        animMode = readInt(wifiBuff,idx,sizeof(wifiBuff));
-        
-        #if PRINT_DEBUGGING_WIFLY
-        debugSerial.print(F("Processed a: "));
-        debugSerial.println(animMode);
-        #endif
-        break;
-      }
-      case 't':
-      {
-        if(wifiBuff[idx] == 'w')
-        {
-          twinkleThresh = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed tw: "));
-          debugSerial.println(twinkleThresh);
-          #endif
-        }
-        else if(wifiBuff[idx+3] == '=')
-        {
-          transMode = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed t***=: "));
-          debugSerial.println(transMode);
-          #endif
-        }
-        else
-        {
-          transTime = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed t: "));
-          debugSerial.println(transTime);
-          #endif
-        }
-        break;
-      }
-      case 'p':
-      {
-        patternMode = readInt(wifiBuff,idx,sizeof(wifiBuff));
-        
-        #if PRINT_DEBUGGING_WIFLY
-        debugSerial.print(F("Processed p: "));
-        debugSerial.println(patternMode);
-        #endif
-        break;
-      }
-      case 'd':
-      {
-        if(wifiBuff[idx] == 'i')
-        {
-          dirMode = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed di: "));
-          debugSerial.println(dirMode);
-          #endif
-        }
-        else
-        {
-          delayTime = readInt(wifiBuff,idx,sizeof(wifiBuff));
-          
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.print(F("Processed d: "));
-          debugSerial.println(delayTime);
-          #endif
-        }
-        break;
-      }
-      case '&':
-      {
-        #if PRINT_DEBUGGING_WIFLY
-        debugSerial.println(F("Skipped &"));
-        #endif
-        break;
-      }
-      default:
-      {
-        #if PRINT_DEBUGGING_WIFLY
-        debugSerial.println(F("Skipped char"));
-        #endif
-        break;
-      }
-    }
-    idx = findIdx(wifiBuff,idx,'&',sizeof(wifiBuff));
-  }
-}
+  for (int i = 0; i < server.args(); i++) {
+    String key = server.argName(i);
+    const char* val = server.arg(i).c_str();
+    debugSerial.print(key);
+    debugSerial.print(": ");
+    debugSerial.print(val);
+    debugSerial.print("=");
+    debugSerial.println(atoi(val));
 
-/******************************
-******************************
-  Parsing Utilities
-******************************
-******************************/
-
-int readInt(char wifiBuff[],int startIdx,int maxIdx)
-{
-  #if PRINT_DEBUGGING_WIFLY_DETAIL
-  debugSerial.print(F("readInt startIdx,arrsize,val: "));
-  debugSerial.print(startIdx);
-  debugSerial.print(F(","));
-  debugSerial.print(sizeof(wifiBuff));
-  debugSerial.print(F(","));
-  debugSerial.println((int)(&wifiBuff));/**/
-  #endif
-  
-  char myBuff[10];//I don't think we should get more than 10 digits
-  memset(myBuff,0,sizeof(myBuff));
-  int myIdx = 0;
-  boolean set = false;
-  for(int i=startIdx;i < maxIdx;i++)
-  {
-    #if PRINT_DEBUGGING_WIFLY_DETAIL
-    debugSerial.print(F("idx:val:myBuff - "));
-    debugSerial.print(i);
-    debugSerial.print(F(":"));
-    debugSerial.print(wifiBuff[i]);
-    debugSerial.print(F(":"));
-    debugSerial.println(myBuff);/**/
-    #endif
-    
-    if(isDigit(wifiBuff[i]))
-    {
-      myBuff[myIdx++] = wifiBuff[i];
-      set = true;
+    if(key.compareTo(F("color")) == 0){
+      if(val[0] != 'r')
+      {
+        patternType = PTYPE_SEQ;
+        LEDSeqLen = atoi(val)+1;//Number, not max index
+      }
+      else
+      {
+        patternType = PTYPE_RAINBOW;
+      }
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed color (seq,rbw): ("));
+      debugSerial.print(LEDSeqLen);
+      debugSerial.print(F(","));
+      debugSerial.print(patternType);
+      debugSerial.println(F(")"));
+      #endif
     }
-    else if(set)
-    {
-      return atoi(myBuff);
+    else if(key.charAt(0) == 'c'){
+      int cidx = atoi(key.c_str());
+      switch(key.charAt(key.length()-1)){
+        case 'r':
+          LEDSeq[cidx] &= ~(strip.Color(255,0,0));
+          LEDSeq[cidx] |= strip.Color(atoi(val),0,0);
+          break;
+        case 'g':
+          LEDSeq[cidx] &= ~(strip.Color(0,255,0));
+          LEDSeq[cidx] |= strip.Color(0,atoi(val),0);
+          break;
+        case 'b':
+          LEDSeq[cidx] &= ~(strip.Color(0,0,255));
+          LEDSeq[cidx] |= strip.Color(0,0,atoi(val));
+          break;
+        default:
+          debugSerial.print("Unknown color in key \"");
+          debugSerial.print(key);
+          debugSerial.println("\"");
+          break;
+      }
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Key \""));
+      debugSerial.print(key);
+      debugSerial.print(F("\" has "));
+      debugSerial.print(F("cidx "));
+      debugSerial.print(cidx);
+      debugSerial.print(F(" and is now colored "));
+      debugSerial.println(LEDSeq[cidx]);
+      #endif
+    }
+    else if(key.compareTo(F("rbw")) == 0){
+      rainbowWidth = atoi(val);
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed rbw: "));
+      debugSerial.println(rainbowWidth);
+      #endif
+    }
+    else if(key.compareTo(F("anim")) == 0){
+      animMode = atoi(val+1);//prepended with 'a'
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed a: "));
+      debugSerial.println(animMode);
+      #endif
+    }
+    else if(key.compareTo(F("twinklePer")) == 0){
+      twinkleThresh = atoi(val);
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed twinklePer: "));
+      debugSerial.println(twinkleThresh);
+      #endif
+    }
+    else if(key.compareTo(F("tran")) == 0){
+      transMode = atoi(val+1);//prepended with 't'
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed tran: "));
+      debugSerial.println(transMode);
+      #endif
+    }
+    else if(key.compareTo(F("transT")) == 0){
+      transTime = atoi(val);
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed transT: "));
+      debugSerial.println(transTime);
+      #endif
+    }
+    else if(key.compareTo(F("patt")) == 0){
+      patternMode = atoi(val+1);//prepended with 'e'
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed patt: "));
+      debugSerial.println(patternMode);
+      #endif
+    }
+    else if(key.compareTo(F("dir")) == 0){
+      dirMode = atoi(val+1);//prepended with 'd'
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed dir: "));
+      debugSerial.println(dirMode);
+      #endif
+    }
+    else if(key == F("delayT")){
+      delayTime = atoi(val);
+      
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed delayT: "));
+      debugSerial.println(delayTime);
+      #endif
     }
   }
-  return -1;
-}
-
-int findIdx(char wifiBuff[],int startIdx,char ch,int maxIdx)
-{
-  #if PRINT_DEBUGGING_WIFLY_DETAIL
-  debugSerial.print(F("findInt startIdx,arrsize,val: "));
-  debugSerial.print(startIdx);
-  debugSerial.print(F(","));
-  debugSerial.print(sizeof(wifiBuff));
-  debugSerial.print(F(","));
-  debugSerial.println((int)(&wifiBuff));/**/
-  #endif
-  
-  for(int i=startIdx;i<maxIdx;i++)
-  {
-    #if PRINT_DEBUGGING_WIFLY_DETAIL
-    debugSerial.print(F("    idx:val - "));
-    debugSerial.print(i);
-    debugSerial.print(F(":"));
-    debugSerial.println(wifiBuff[i]);/**/
-    #endif
-    if(wifiBuff[i] == ch)
-    {
-      return i+1;
-    }
-  }
-  return -1;
 }
 
 /******************************
