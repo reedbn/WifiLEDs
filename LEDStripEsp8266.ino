@@ -1,4 +1,6 @@
-#include "IIRFilter.h"
+#include <Adafruit_NeoPixel.h>
+#include <ESP8266WiFi.h>
+#include <IIRFilter.h>
 #include <pgmspace.h>
 
 //Initialization/hardware config
@@ -10,12 +12,14 @@ const char* ssid = "RFish";
 const char* pass = "NotUrFish";
 const IPAddress apIP(192,168,4,1);
 
-#define PRINT_DEBUGGING_LED (1)
+#define PRINT_DEBUGGING_LED (0)
 #define PRINT_DEBUGGING_WIFLY (1)
+#define PRINT_DEBUGGING_WIFLY_DETAIL (0)
 
 //Externs
 extern IIRFilter timeScaler;
 extern uint32_t LEDNext[];
+extern Adafruit_NeoPixel strip;
 
 void setup()
 {
@@ -34,9 +38,9 @@ void loop()
   #if PRINT_DEBUGGING_LED
   Serial.println(F("Strip Loop..."));
   #endif
-  stripLoop();
+  //stripLoop();
   
-  #if PRINT_DEBUGGING_WIFLY
+  #if PRINT_DEBUGGING_WIFLY_DETAIL
   Serial.println(F("WiFi Loop..."));
   #endif
   wifiLoop();
