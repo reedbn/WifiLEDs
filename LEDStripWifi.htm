@@ -46,7 +46,8 @@ h1
                        "animstyle  animtype animtrans   animdir  animtime"
                        "     save      save      save      save     save";
 }
-@media only screen and (max-width: 700px){
+@media screen and (max-width: 600px),
+       screen and (orientation:portrait){
   .gridArea{
     grid-template-areas: "colorhead"
                          "colorseq"
@@ -71,6 +72,7 @@ h1
 .atime{grid-area: animtime;}
 .savebuttons{grid-area: save; padding-top: 5%}
 </style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body onload="updateAll()">
   <form action="" method="get">
@@ -153,7 +155,7 @@ h1
       <input type="radio" name="color" value="p6" />Jungle<br/>
     </div>
     <h1 class="ahead">Animation</h1>
-    <div class="animstyle">
+    <div class="astyle">
       <h2>Style</h2>
       <input type="radio" name="anim" value="a0" checked="checked" />None<br/>
       <input type="radio" name="anim" value="a1" />Scroll<br/>
