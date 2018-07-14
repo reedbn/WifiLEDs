@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
+#define debugSerial Serial
+
 //353 characters would be 3 digit values for every color value,
 //four digits for every numeric value, which is unlikely
 char wifiBuff[353];
@@ -25,12 +27,16 @@ void send404();
 
 void wifiSetup()
 {
+  //Ensure that we're in a reasonable state
+  WiFi.setAutoConnect(false);
+  WiFi.disconnect(true);
+  
   //Set up the WiFi AP
-  WiFi.mode(WIFI_AP_STA);//AP and/or client mode
+  WiFi.mode(WIFI_AP);//AP mode
   WiFi.softAPConfig(apIP,//Our IP
                     apIP,//Gateway IP
                     IPAddress(255,255,255,0));//Subnet mask
-  WiFi.softAP(ssid,password);
+  WiFi.softAP(ssid,pass);
   IPAddress myIP = WiFi.softAPIP();
   #if PRINT_DEBUGGING_WIFLY
   Serial.print(F("AP IP address: "));
@@ -338,31 +344,26 @@ int findIdx(char wifiBuff[],int startIdx,char ch,int maxIdx)
 
 void sendChunkln(const __FlashStringHelper *str)
 {
-    Serial.println(strlen_P((const prog_char *)str)+2,HEX);
-    Serial.println(str);
-    Serial.println();
+  server.sendContent(str);
+  server.sendContent("\n");
 }
 void sendChunkln()
 {
-    Serial.println('0');
-    Serial.println();
+  server.sendContent("\n");
 }
 
 void sendChunk(const __FlashStringHelper *str)
 {
-    Serial.println(strlen_P((const prog_char *)str),HEX);
-    Serial.println(str);
+    server.sendContent(str);
 }
 void sendChunk(const char *str)
 {
-    Serial.println(strlen(str),HEX);
-    Serial.println(str);
+  server.sendContent(str);
 }
 void sendChunk(int num)
 {
   sendChunk(itoa(num,wifiBuff,10));
 }
-
 
 /******************************************************************
 *******************************************************************
@@ -374,10 +375,13 @@ void sendChunk(int num)
 void send404()
 {  
   //Page header
-  Serial.println(F("HTTP/1.1 404 Not Found"));
-  Serial.println(F("Content-Type: text/html"));
-  Serial.println(F("Transfer-Encoding: chunked"));
-  Serial.println();
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server.sendHeader("Pragma", "no-cache");
+  server.sendHeader("Expires", "-1");
+
+  //Start chunked data transfer
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(404, "text/html", "");
   
   //Actual html
   sendChunkln(F("<html><head>"));
@@ -388,16 +392,27 @@ void send404()
   sendChunkln(F("<a href=\"/\">Try Again</a>"));
   sendChunkln(F("</body></html>"));
   sendChunkln();
+
+  //End chunked transfer
+  server.sendContent(F(""));
+  server.client().stop();
+
+  #if PRINT_DEBUGGING_WIFLY
+  debugSerial.println(F("404 Page Sent"));
+  #endif
 }
 
 /** Send the form */
 void sendIndex()
 {
   //Page header
-  Serial.println(F("HTTP/1.1 200 OK"));
-  Serial.println(F("Content-Type: text/html"));
-  Serial.println(F("Transfer-Encoding: chunked"));
-  Serial.println();
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server.sendHeader("Pragma", "no-cache");
+  server.sendHeader("Expires", "-1");
+
+  //Start chunked data transfer
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, "text/html", "");
   
   //Actual html
   sendChunkln(F("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"));
@@ -507,6 +522,11 @@ void sendIndex()
   sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;\"/>"));
   sendChunkln(F("</div></form></body></html>"));
   sendChunkln();
+
+  //End chunked transfer
+  server.sendContent(F(""));
+  server.client().stop();
+  
   #if PRINT_DEBUGGING_WIFLY
   debugSerial.println(F("Index Page Sent"));
   #endif
