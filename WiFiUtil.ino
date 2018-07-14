@@ -105,7 +105,8 @@ void processPost()
   
   for (int i = 0; i < server.args(); i++) {
     String key = server.argName(i);
-    const char* val = server.arg(i).c_str();
+    String valstr = server.arg(i);
+    const char* val = valstr.c_str();
     debugSerial.print(key);
     debugSerial.print(": ");
     debugSerial.print(val);
@@ -132,7 +133,7 @@ void processPost()
       #endif
     }
     else if(key.charAt(0) == 'c'){
-      int cidx = atoi(key.c_str());
+      int cidx = atoi(key.c_str()+1);//skip the 'c' when doing atoi
       switch(key.charAt(key.length()-1)){
         case 'r':
           LEDSeq[cidx] &= ~(strip.Color(255,0,0));
@@ -331,7 +332,7 @@ void sendIndex()
   
   //Generate a spot for each color
   const char* cnames[] = {"r","g","b"};
-  const int shifts[] = {8,16,0};
+  const int shifts[] = {16,8,0};
   char* currIdx;
   uint32_t mask;
   for(int i = 0; i < maxSeqLen; i++)
