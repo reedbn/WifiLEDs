@@ -14,6 +14,7 @@ ESP8266WebServer server(80);//Port 80
 extern const char* ssid;
 extern const char* pass;
 extern const IPAddress apIP;
+extern volatile bool stripParamsUpdated;
 
 /******************************************************************
 *******************************************************************
@@ -83,6 +84,7 @@ void handleRootPost(){
   Serial.println(F("Got POST"));
   #endif
   processPost();
+  stripParamsUpdated = true;
   sendIndex();
 }
 
