@@ -32,6 +32,8 @@ byte twinkleThresh = 20;//percent of LEDs to turn on
 unsigned int frameNum = 0;
 IIRFilter timeScaler = IIRFilter(0.8,10.0);//alpha, starting value
 
+volatile bool stripParamsUpdated;
+
 void stripSetup()
 {
   //Start the strip driver
@@ -138,7 +140,8 @@ void stripLoop()
   }
   
   //Software interrupt
-  if(Serial.available() > 0)
+  yield();
+  if(stripParamsUpdated)
   {
     return;
   }
@@ -157,7 +160,8 @@ void stripLoop()
   strip.show();*/
   
   //Software interrupt
-  if(Serial.available() > 0)
+  yield();
+  if(stripParamsUpdated)
   {
     return;
   }
@@ -199,7 +203,8 @@ void Transition()
         strip.setPixelColor(i,LEDNext[i]);
         
         //Software interrupt
-        if(Serial.available() > 0)
+        yield();
+        if(stripParamsUpdated)
         {
           return;
         }
@@ -234,7 +239,8 @@ void Transition()
           strip.setPixelColor(j,tmp_color);
           
           //Software interrupt
-          if(Serial.available() > 0)
+          yield();
+          if(stripParamsUpdated)
           {
             return;
           }
@@ -270,7 +276,8 @@ void Transition()
           strip.setPixelColor(j,LinInterp(strip.getPixelColor(j),intermed_color,fraction));
           
           //Software interrupt
-          if(Serial.available() > 0)
+          yield();
+          if(stripParamsUpdated)
           {
             return;
           }
@@ -284,7 +291,8 @@ void Transition()
         {
           strip.setPixelColor(j,LinInterp(intermed_color,LEDNext[j],fraction));
           //Software interrupt
-          if(Serial.available() > 0)
+          yield();
+          if(stripParamsUpdated)
           {
             return;
           }
@@ -340,7 +348,8 @@ void RainbowCycle()
       LEDNext[i] = Wheel(tmpColor);
       
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -360,7 +369,8 @@ void RainbowCycle()
       LEDNext[i] = tmpColor;
       
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -400,7 +410,8 @@ void None()
         }
         
         //Software interrupt
-        if(Serial.available() > 0)
+        yield();
+        if(stripParamsUpdated)
         {
           return;
         }
@@ -418,7 +429,8 @@ void None()
         LEDNext[i*block_width + j] = LEDSeq[i];
         
         //Software interrupt
-        if(Serial.available() > 0)
+        yield();
+        if(stripParamsUpdated)
         {
           return;
         }
@@ -432,7 +444,8 @@ void None()
     {
       LEDNext[i] = LEDSeq[0];
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -468,7 +481,8 @@ void Scroll()
         LEDNext[i] = LEDSeq[(offset + i)%LEDSeqLen];
         
         //Software interrupt
-        if(Serial.available() > 0)
+        yield();
+        if(stripParamsUpdated)
         {
           return;
         }
@@ -489,7 +503,8 @@ void Scroll()
         LEDNext[i] = LEDSeq[(int)((offset + i)*1.0/numLEDs * LEDSeqLen)];
         
         //Software interrupt
-        if(Serial.available() > 0)
+        yield();
+        if(stripParamsUpdated)
         {
           return;
         }
@@ -508,7 +523,8 @@ void Scroll()
       LEDNext[i] = LEDSeq[seq_idx];
       
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -579,7 +595,8 @@ void Snake()
     }
     
     //Software interrupt
-    if(Serial.available() > 0)
+    yield();
+    if(stripParamsUpdated)
     {
       return;
     }
@@ -604,7 +621,8 @@ void Twinkle()
       }
       
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -621,7 +639,8 @@ void Twinkle()
       }
         
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -644,7 +663,8 @@ void Twinkle()
       }
       
       //Software interrupt
-      if(Serial.available() > 0)
+      yield();
+      if(stripParamsUpdated)
       {
         return;
       }
@@ -665,7 +685,8 @@ void clearStrip()
     strip.setPixelColor(i,0,0,0);
     
     //Software interrupt
-    if(Serial.available() > 0)
+    yield();
+    if(stripParamsUpdated)
     {
       return;
     }
@@ -680,11 +701,27 @@ void clearLEDNext()
     LEDNext[i] = 0;
     
     //Software interrupt
-    if(Serial.available() > 0)
+    yield();
+    if(stripParamsUpdated)
     {
       return;
     }
   }
+}
+
+void resetStrip()
+{
+  for(int i=0; i<numLEDs; ++i)
+  {
+    strip.setPixelColor(i,0,0,0);
+    LEDNext[i] = 0;
+  }
+  strip.show();
+  
+  //Reset the IIR filter
+  timeScaler.reset();
+
+  stripParamsUpdated = false;
 }
 
 //Wheel taken from example sketch for LPD8806 library
