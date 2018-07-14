@@ -1,4 +1,5 @@
 #include "IIRFilter.h"
+#include <pgmspace.h>
 
 //Initialization/hardware config
 #define LEDdataPin           2
@@ -7,6 +8,10 @@
 
 const char* ssid = "RFish";
 const char* pass = "NotUrFish";
+const IPAddress apIP(192,168,4,1);
+
+#define PRINT_DEBUGGING_LED (1)
+#define PRINT_DEBUGGING_WIFLY (1)
 
 //Externs
 extern IIRFilter timeScaler;
@@ -15,10 +20,10 @@ extern uint32_t LEDNext[];
 void setup()
 {
   //Start the serial
-  debugSerial.begin(74880);
+  Serial.begin(74880);
   
-  //Set up wifly
-  wiflySetup();
+  //Set up WiFi
+  wifiSetup();
 
   //Setup strip
   stripSetup();
@@ -27,9 +32,14 @@ void setup()
 void loop()
 {
   #if PRINT_DEBUGGING_LED
-  debugSerial.println(F("Strip Loop..."));
+  Serial.println(F("Strip Loop..."));
   #endif
   stripLoop();
+  
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println(F("WiFi Loop..."));
+  #endif
+  wifiLoop();
 }
 
 //This is not an actual interrupt (unfortunately),
@@ -38,9 +48,9 @@ void loop()
 void serialEvent()
 {
   #if PRINT_DEBUGGING_WIFLY
-  debugSerial.println(F("Wifi Loop..."));
+  Serial.println(F("Wifi Loop..."));
   #endif
-  wiflyLoop();
+  wifiLoop();
   
   //Clear the strip, since the pattern might have changed
   for(int i=0; i<numLEDs; ++i)

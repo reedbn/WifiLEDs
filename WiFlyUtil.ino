@@ -1,6 +1,17 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
 //353 characters would be 3 digit values for every color value,
 //four digits for every numeric value, which is unlikely
 char wifiBuff[353];
+
+//Set up web server
+ESP8266WebServer server(80);//Port 80
+
+//Externs
+extern const char* ssid;
+extern const char* pass;
+extern const IPAddress apIP;
 
 /******************************************************************
 *******************************************************************
@@ -8,118 +19,31 @@ char wifiBuff[353];
 *******************************************************************
 ******************************************************************/
 
-void wiflySetup()
+//Forward declarations
+void handleRoot();
+void send404();
+
+void wifiSetup()
 {
-  /*
-  //Set up WiFly
-  debugSerial.println(F("Setting up Wifly"));
-  
-  //Enter command mode
-  Serial.print(F("$$$"));delay(10);
-  if(!Serial.find(PSTR("CMD")))
-  {
-    debugSerial.println(F("Baudrate not right"));
-  }
-  
-  //Set the SSID
-  Serial.print(F("set wlan ssid "));
-  Serial.print(F("PleaseInsertCoin\r"));delay(10);
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set SSID"));
-  }
-  
-  //Set the passphrase
-  Serial.print(F("set wlan phrase "));
-  Serial.print(F("player1start\r"));delay(10);
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set password"));
-  }
-  
-  //Set WPA mode
-  /*0 Open (Default)
-    1 WEP-128
-    2 WPA1
-    3 Mixed WPA1 and WPA2-PSK
-    4 WPA2-PSK
-    5 Not used
-    6 Ad hoc mode (join any ad hoc network)
-    8 WPE-64*/
-  /*Serial.print(F("set wlan auth 4\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set WPA"));
-  }
-  
-  //Set channel to "any"
-  Serial.print(F("set wlan channel 0\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set channel"));
-  }
-  
-  //Set to join the AP automatically
-  Serial.print(F("set wlan join 1\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't join"));
-  }
-  
-  //Turn DHCP on
-  Serial.print(F("set ip dhcp 1\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't turn on DHCP"));
-  }
-  
-  //Set the listening port to 80 (http)
-  Serial.print(F("set ip localport 80\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set port 80"));
-  }
-  
-  //Set device id
-  Serial.print(F("set opt deviceid LED-Strip\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set name"));
-  }
-  
-  //Turn off UDP broadcasting
-  Serial.print(F("set broadcast interval 0\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't turn off broadcast"));
-  }
-  
-  //Clear any connections we may have right now
-  Serial.print(F("close\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't close existing connection"));
-  }
-  
-  //Save current configuration
-  Serial.print(F("save\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't set save"));
-  }
-  
-  //Exit command mode
-  Serial.print(F("exit\r"));
-  if(!Serial.find(PSTR(">")))
-  {
-    debugSerial.println(F("Couldn't exit command mode"));
-  }*/
-  
-  flushRx();
-  closeRx();
-  
+  //Set up the WiFi AP
+  WiFi.mode(WIFI_AP_STA);//AP and/or client mode
+  WiFi.softAPConfig(apIP,//Our IP
+                    apIP,//Gateway IP
+                    IPAddress(255,255,255,0));//Subnet mask
+  WiFi.softAP(ssid,password);
+  IPAddress myIP = WiFi.softAPIP();
   #if PRINT_DEBUGGING_WIFLY
-  debugSerial.println(F("Wifly Setup Complete"));
+  Serial.print(F("AP IP address: "));
+  Serial.println(myIP);
+  
+  //Set up the web server
+  server.on("/", HTTP_GET, handleRootGet);
+  server.on("/", HTTP_POST, handleRootPost);
+  server.onNotFound(send404);
+  server.begin();
+  #endif
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println(F("Setup Complete"));
   #endif
 }
 
@@ -127,61 +51,23 @@ void wiflySetup()
      Wifi Loop Procedure
 **********************************/
 
-void wiflyLoop()
+void wifiLoop()
 {
-  Serial.readBytes(wifiBuff,10);//Should be able to get GET or POST in 10 bytes
-  boolean pageFound = false;
-  for(int i=0;i<sizeof(wifiBuff)-3;i++)//-3 to account for the +3 for POST
-  {
-    if(wifiBuff[i] == 'G')
-    {
-      if(wifiBuff[i+1] == 'E')
-      {
-        if(wifiBuff[i+2] == 'T')
-        {
-          #if PRINT_DEBUGGING_WIFLY
-          debugSerial.println(F("Got GET"));
-          #endif
-          pageFound = true;
-          sendIndex();
-          break;
-        }
-      }
-    }
-    else if(wifiBuff[i] == 'P')
-    {
-      if(wifiBuff[i+1] == 'O')
-      {
-        if(wifiBuff[i+2] == 'S')
-        {
-          if(wifiBuff[i+3] == 'T')
-          {
-            #if PRINT_DEBUGGING_WIFLY
-            debugSerial.println(F("Got POST"));
-            #endif
-            processPost();
-            pageFound = true;
-            sendIndex();
-            break;
-          }
-        }
-      }
-    }
-  }
-  if(!pageFound)
-  {
-    #if PRINT_DEBUGGING_WIFLY
-    debugSerial.println(F("No GET/POST found. Sending 404"));
-    printAll();
-    #endif
-    send404();
-  }
-  
-  if(!Serial.find(PSTR("OS*"),3))//Try to get a normal close
-  {
-    closeRx();
-  }
-  flushRx();
+   server.handleClient();
+}
+
+void handleRootGet(){
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println(F("Got GET"));
+  #endif
+  sendIndex();
+}
+void handleRootPost(){
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println(F("Got POST"));
+  #endif
+  processPost();
+  sendIndex();
 }
 
 
@@ -194,6 +80,13 @@ void wiflyLoop()
 //Goes through and sets settings when POST received
 void processPost()
 {
+  String message;
+  for (uint8_t i = 0; i < server.args(); i++) {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+  Serial.println(message);
+  return;
+  
   //Skip to \r\n\r\n, since that separates the
   //header from the data
   Serial.find("\r\n\r\n",4);
@@ -364,46 +257,6 @@ void processPost()
     idx = findIdx(wifiBuff,idx,'&',sizeof(wifiBuff));
   }
 }
-
-void flushRx()
-{
-  #if PRINT_DEBUGGING_WIFLY
-  debugSerial.println(F("flushRx()"));
-  #endif
-  uint32_t start = millis();
-  while(millis() - start < 500)
-  {
-    Serial.read();
-  }
-}
-
-void closeRx()
-{
-  #if PRINT_DEBUGGING_WIFLY
-  debugSerial.println(F("closeRx()"));
-  #endif
-  Serial.print(F("$$$"));
-  Serial.find(PSTR("CMD"),3);
-  Serial.print(F("close\r"));
-  Serial.find(PSTR("OS*"),3);
-  Serial.print(F("exit\r"));
-  Serial.find(PSTR("T"));//EXIT/**/
-}
-
-#if PRINT_DEBUGGING_WIFLY
-void printAll()
-{
-  uint32_t start = millis();
-  while((millis() - start < 500))
-  {
-    if(Serial.available() > 0)
-    {
-      debugSerial.print((char)Serial.read());
-    }
-  }
-  debugSerial.println();
-}
-#endif
 
 /******************************
 ******************************
