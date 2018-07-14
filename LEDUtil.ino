@@ -722,22 +722,20 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
     return color1;
   if(fraction == 0.0)
     return color2;*/
-  byte g1 = (color1 >> 16)&0x7F;
-  byte r1 = (color1 >>  8)&0x7F;
+  byte r1 = (color1 >> 16)&0x7F;
+  byte g1 = (color1 >>  8)&0x7F;
   byte b1 = (color1      )&0x7F;
-  byte g2 = (color2 >> 16)&0x7F;
-  byte r2 = (color2 >>  8)&0x7F;
+  byte r2 = (color2 >> 16)&0x7F;
+  byte g2 = (color2 >>  8)&0x7F;
   byte b2 = (color2      )&0x7F;
   
-  float fractionLH = (pow(1000,fraction)-1 + fraction )/1000;//Exponential
-  float fractionHL = log10(9*fraction + 1);
   if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2)
-    fraction = fractionLH;
+    fraction = (pow(1000,fraction)-1 + fraction )/1000;//Exponential
   else
-    fraction = fractionHL;
-  
-  byte g = round(fraction*g1 + (1-fraction)*g2);
+    fraction = log10(9*fraction + 1);
+
   byte r = round(fraction*r1 + (1-fraction)*r2);
+  byte g = round(fraction*g1 + (1-fraction)*g2);
   byte b = round(fraction*b1 + (1-fraction)*b2);
   /*byte g = 127*pow(1000,((1-fraction)*(g2-g1))/127.0)/1000 + g1;
   byte r = 127*pow(1000,((1-fraction)*(r2-r1))/127.0)/1000 + r1;
