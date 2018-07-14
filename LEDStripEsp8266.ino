@@ -57,7 +57,7 @@ void loop()
   #endif
   wifiLoop();
 
-  if(++loop_counter %100000 == 0){
+  if(++loop_counter %10000 == 0){
     Serial.print(F("Loop "));
     Serial.println(loop_counter);
   }
