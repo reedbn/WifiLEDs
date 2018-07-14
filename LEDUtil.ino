@@ -1,5 +1,9 @@
+#include <Adafruit_NeoPixel.h>
+
+#define debugSerial Serial
+
 //Setup the strip driver
-LPD8806 strip = LPD8806(numLEDs, LEDdataPin, LEDclockPin);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDs, LEDdataPin, NEO_GRB + NEO_KHZ800);
 
 //Create some arrays to store desired colors
 uint32_t LEDSeq [maxSeqLen];
@@ -779,10 +783,11 @@ byte pmap(byte c1, byte c2, float fraction)
   return factor * 0x7F;
 }
 
+extern "C" {
+#include "user_interface.h"
+}
 int freeRam () {
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+  return system_get_free_heap_size();
 }
 
 void LEDquickTest()
