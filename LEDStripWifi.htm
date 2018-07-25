@@ -32,6 +32,9 @@ h1
   float:left;
   clear:left;
 }
+input{
+  width: 3em;
+}
 .cOut{
   width:20pt;
   height:20pt;
@@ -82,70 +85,70 @@ h1
       <h2>Color Sequence (0-255)</h2>
       <div class="cIn">
         <input type="radio" disabled="disabled" />
-        <input type="text" value="R" size="3" disabled="disabled" />
-        <input type="text" value="G" size="3" disabled="disabled" />
-        <input type="text" value="B" size="3" disabled="disabled" />
+        <input type="text" value="R" disabled="disabled" />
+        <input type="text" value="G" disabled="disabled" />
+        <input type="text" value="B" disabled="disabled" />
       </div>
       <div class="cIn">
         <input type="radio" name="color" value="0" />
-        <input type="text" name="c0r" id="c0r" value="255" size="3" onblur="updateColor(0)"/>
-        <input type="text" name="c0g" id="c0g" value="0" size="3" onblur="updateColor(0)"/>
-        <input type="text" name="c0b" id="c0b" value="0" size="3" onblur="updateColor(0)"/>
+        <input type="number" name="c0r" id="c0r" value="255" min="0" max="255" step="1" onblur="updateColor(0)"/>
+        <input type="number" name="c0g" id="c0g" value="0" min="0" max="255" step="1" onblur="updateColor(0)"/>
+        <input type="number" name="c0b" id="c0b" value="0" min="0" max="255" step="1" onblur="updateColor(0)"/>
       </div>
       <div id="blk0" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="1" />
-        <input type="text" name="c1r" id="c1r" value="0" size="3" onblur="updateColor(1)"/>
-        <input type="text" name="c1g" id="c1g" value="255" size="3" onblur="updateColor(1)"/>
-        <input type="text" name="c1b" id="c1b" value="0" size="3" onblur="updateColor(1)"/>
+        <input type="number" name="c1r" id="c1r" value="0" min="0" max="255" step="1" onblur="updateColor(1)"/>
+        <input type="number" name="c1g" id="c1g" value="255" min="0" max="255" step="1" onblur="updateColor(1)"/>
+        <input type="number" name="c1b" id="c1b" value="0" min="0" max="255" step="1" onblur="updateColor(1)"/>
       </div>
       <div id="blk1" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="2" checked="checked" />
-        <input type="text" name="c2r" id="c2r" value="0" size="3" onblur="updateColor(2)"/>
-        <input type="text" name="c2g" id="c2g" value="0" size="3" onblur="updateColor(2)"/>
-        <input type="text" name="c2b" id="c2b" value="255" size="3" onblur="updateColor(2)"/>
+        <input type="number" name="c2r" id="c2r" value="0" min="0" max="255" step="1" onblur="updateColor(2)"/>
+        <input type="number" name="c2g" id="c2g" value="0" min="0" max="255" step="1" onblur="updateColor(2)"/>
+        <input type="number" name="c2b" id="c2b" value="255" min="0" max="255" step="1" onblur="updateColor(2)"/>
       </div>
       <div id="blk2" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="3" checked="checked" />
-        <input type="text" name="c3r" id="c3r" value="0" size="3" onblur="updateColor(3)"/>
-        <input type="text" name="c3g" id="c3g" value="0" size="3" onblur="updateColor(3)"/>
-        <input type="text" name="c3b" id="c3b" value="0" size="3" onblur="updateColor(3)"/>
+        <input type="number" name="c3r" id="c3r" value="0" min="0" max="255" step="1" onblur="updateColor(3)"/>
+        <input type="number" name="c3g" id="c3g" value="0" min="0" max="255" step="1" onblur="updateColor(3)"/>
+        <input type="number" name="c3b" id="c3b" value="0" min="0" max="255" step="1" onblur="updateColor(3)"/>
       </div>
       <div id="blk3" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="4" checked="checked" />
-        <input type="text" name="c4r" id="c4r" value="255" size="3" onblur="updateColor(4)"/>
-        <input type="text" name="c4g" id="c4g" value="255" size="3" onblur="updateColor(4)"/>
-        <input type="text" name="c4b" id="c4b" value="0" size="3" onblur="updateColor(4)"/>
+        <input type="number" name="c4r" id="c4r" value="255" min="0" max="255" step="1" onblur="updateColor(4)"/>
+        <input type="number" name="c4g" id="c4g" value="255" min="0" max="255" step="1" onblur="updateColor(4)"/>
+        <input type="number" name="c4b" id="c4b" value="0" min="0" max="255" step="1" onblur="updateColor(4)"/>
       </div>
       <div id="blk4" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="5" checked="checked" />
-        <input type="text" name="c5r" id="c5r" value="255" size="3" onblur="updateColor(5)"/>
-        <input type="text" name="c5g" id="c5g" value="0" size="3" onblur="updateColor(5)"/>
-        <input type="text" name="c5b" id="c5b" value="255" size="3" onblur="updateColor(5)"/>
+        <input type="number" name="c5r" id="c5r" value="255" min="0" max="255" step="1" onblur="updateColor(5)"/>
+        <input type="number" name="c5g" id="c5g" value="0" min="0" max="255" step="1" onblur="updateColor(5)"/>
+        <input type="number" name="c5b" id="c5b" value="255" min="0" max="255" step="1" onblur="updateColor(5)"/>
       </div>
       <div id="blk5" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="6" checked="checked" />
-        <input type="text" name="c6r" id="c6r" value="0" size="3" onblur="updateColor(6)"/>
-        <input type="text" name="c6g" id="c6g" value="255" size="3" onblur="updateColor(6)"/>
-        <input type="text" name="c6b" id="c6b" value="255" size="3" onblur="updateColor(6)"/>
+        <input type="number" name="c6r" id="c6r" value="0" min="0" max="255" step="1" onblur="updateColor(6)"/>
+        <input type="number" name="c6g" id="c6g" value="255" min="0" max="255" step="1" onblur="updateColor(6)"/>
+        <input type="number" name="c6b" id="c6b" value="255" min="0" max="255" step="1" onblur="updateColor(6)"/>
       </div>
       <div id="blk6" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="7" checked="checked" />
-        <input type="text" name="c7r" id="c7r" value="127" size="3" onblur="updateColor(7)"/>
-        <input type="text" name="c7g" id="c7g" value="127" size="3" onblur="updateColor(7)"/>
-        <input type="text" name="c7b" id="c7b" value="127" size="3" onblur="updateColor(7)"/>
+        <input type="number" name="c7r" id="c7r" value="127" min="0" max="255" step="1" onblur="updateColor(7)"/>
+        <input type="number" name="c7g" id="c7g" value="127" min="0" max="255" step="1" onblur="updateColor(7)"/>
+        <input type="number" name="c7b" id="c7b" value="127" min="0" max="255" step="1" onblur="updateColor(7)"/>
       </div>
       <div id="blk7" class="cOut"></div><br/>
     </div>
     <div class="cpre">
       <h2>Presets</h2>
-      <input type="radio" name="color" value="r" />Rainbow <input type="text" name="rbw" value="160" size="5" />Width<br/>
+      <input type="radio" name="color" value="r" />Rainbow <input type="number" name="rbw" value="160" min="1" step="1" />Width<br/>
       <input type="radio" name="color" value="p0" />Holiday<br/>
       <input type="radio" name="color" value="p1" />Patriotic<br/>
       <input type="radio" name="color" value="p2" />Halloween<br/>
@@ -160,7 +163,7 @@ h1
       <input type="radio" name="anim" value="a0" checked="checked" />None<br/>
       <input type="radio" name="anim" value="a1" />Scroll<br/>
       <input type="radio" name="anim" value="a2" />Snake<br/>
-      <input type="radio" name="anim" value="a3" />Twinkle <input type="text" name="twinklePer" value="20" size="3" />% on<br/>
+      <input type="radio" name="anim" value="a3" />Twinkle <input type="number" name="twinklePer" min="0" max="100" step="1" value="20" />% on<br/>
     </div>
     <div class="atype">
       <h2>Type</h2>
@@ -184,12 +187,12 @@ h1
     </div>
     <div class="atime">
       <h2>Timing</h2>
-      <input type="text" name="transT" value="100" size="3" /> Transition (ms)<br/>
-      <input type="text" name="delayT" value="100" size="3" /> Delay (ms)<br/>
+      <input type="number" min="0" step="1" name="transT" style="width:5em" value="100" /> Transition (ms)<br/>
+      <input type="number" min="0" step="1" name="delayT" style="width:5em" value="100" /> Delay (ms)<br/>
     </div>
     <div class="savebuttons">
       <input type="checkbox" name="eeprom" />Persist on reboot<br/>
-      <input type="submit" value="Save Settings" style="padding:10px;"/>
+      <input type="submit" value="Save Settings" style="padding:10px;width:auto;"/>
     </div>
   </div>
   </form>

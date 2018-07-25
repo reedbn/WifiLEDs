@@ -324,6 +324,7 @@ void sendIndex()
   sendChunkln(F("target.style.backgroundColor = \"#\" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);}"));
   sendChunkln(F("--></script><style type=\"text/css\">h1{padding-top:20px;margin-bottom:0px;}"));
   sendChunkln(F(".cIn{float:left;clear:left;} .cOut{width:20px;height:20px;overflow:visible;float:left;}"));
+  sendChunkln(F("input{width: 3em;}"));
   sendChunkln(F(".gridArea{"));
   sendChunkln(F("  display: grid;"));
   sendChunkln(F("  grid-template-areas: \"colorhead colorhead colorhead colorhead colorhead\""));
@@ -363,9 +364,9 @@ void sendIndex()
   sendChunkln(F("<body onload=\"updateAll()\"><form action=\"\" method=\"post\">"));
   sendChunkln(F("<div class=\"gridArea\"><h1 class=\"chead\">Colors</h1><div class=\"cseq\"><h2>Color Sequence (0-255)</h2>"));
   sendChunkln(F("<div class=\"cIn\"><input type=\"radio\" disabled=\"disabled\" />"));
-  sendChunkln(F("<input type=\"text\" value=\"R\" size=\"3\" disabled=\"disabled\" />"));
-  sendChunkln(F("<input type=\"text\" value=\"G\" size=\"3\" disabled=\"disabled\" />"));
-  sendChunkln(F("<input type=\"text\" value=\"B\" size=\"3\" disabled=\"disabled\" /></div>"));
+  sendChunkln(F("<input type=\"text\" value=\"R\" disabled=\"disabled\" />"));
+  sendChunkln(F("<input type=\"text\" value=\"G\" disabled=\"disabled\" />"));
+  sendChunkln(F("<input type=\"text\" value=\"B\" disabled=\"disabled\" /></div>"));
   
   //Generate a spot for each color
   const char* cnames[] = {"r","g","b"};
@@ -393,13 +394,13 @@ void sendIndex()
     //Iterate over colors (RGB)
     for(int j = 0; j < 3; j++)
     {
-      sendChunk(F("<input type=\"text\" name=\"c"));
+      sendChunk(F("<input type=\"number\" name=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" id=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" value=\""));
       mask = 0xFF;
       mask = mask<<shifts[j];
       sendChunk(itoa((LEDSeq[i]&mask)>>shifts[j],wifiBuff+6,10));
-      sendChunk(F("\" size=\"3\" onblur=\"updateColor("));
+      sendChunk(F("\" min=\"0\" max=\"255\" step=\"1\" onblur=\"updateColor("));
       sendChunk(currIdx);sendChunkln(F(")\"/>"));
     }
     sendChunk(F("</div><div id=\"blk"));
@@ -408,7 +409,7 @@ void sendIndex()
 
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
-  sendChunk  (F("<input type=\"text\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunkln(F("\" size=\"5\" />Width<br/>"));
+  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunkln(F("\" min=\"1\" step=\"1\" />Width<br/>"));
     /*<input type="radio" name="color" value="p0" />Holiday<br/>
       <input type="radio" name="color" value="p1" />Patriotic<br/>
       <input type="radio" name="color" value="p2" />Halloween<br/>
@@ -424,7 +425,7 @@ void sendIndex()
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake<br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
-  sendChunk  (F("<input type=\"text\" name=\"twinklePer\" value=\""));sendChunk(twinkleThresh);sendChunkln(F("\" size=\"3\" />% on<br/></div>"));
+  sendChunk  (F("<input type=\"number\" name=\"twinklePer\" value=\""));sendChunk(twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
   
   sendChunkln(F("<div class=\"atype\"><h2>Type</h2>"));
   sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e0\""));if(patternMode==PATTERN_SERIAL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Serial<br/>"));
@@ -445,12 +446,12 @@ void sendIndex()
   sendChunkln(F("</div>"));
   
   sendChunkln(F("<div class=\"atime\"><h2>Timing</h2>"));
-  sendChunk  (F("<input type=\"text\" name=\"transT\" value=\""));sendChunk(transTime);sendChunkln(F("\" size=\"3\" /> Transition (ms)<br/>"));
-  sendChunk  (F("<input type=\"text\" name=\"delayT\" value=\""));sendChunk(delayTime);sendChunkln(F("\" size=\"3\" /> Delay (ms)<br/></div>"));
+  sendChunk  (F("<input type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
+  sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
   sendChunkln(F("<div class=\"savebuttons\">"));
   /*sendChunkln(F("<input type=\"checkbox\" name=\"eeprom\" />Persist on reboot<br/>"));*/
-  sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;\"/>"));
+  sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;width:auto;\"/>"));
   sendChunkln(F("</div></form></body></html>"));
   sendChunkln();
 
