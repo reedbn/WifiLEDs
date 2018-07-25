@@ -15,9 +15,9 @@ function updateAll()
 function updateColor(idx)
 {
   var target = document.getElementById("blk"+idx);
-  var r = parseInt(document.getElementById("c"+idx+"r").value)*2;
-  var g = parseInt(document.getElementById("c"+idx+"g").value)*2;
-  var b = parseInt(document.getElementById("c"+idx+"b").value)*2;
+  var r = parseInt(document.getElementById("c"+idx+"r").value);
+  var g = parseInt(document.getElementById("c"+idx+"g").value);
+  var b = parseInt(document.getElementById("c"+idx+"b").value);
   target.style.backgroundColor = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 -->
@@ -79,7 +79,7 @@ h1
   <div class="gridArea">
     <h1 class="chead">Colors</h1>
     <div class="cseq">
-      <h2>Color Sequence (0-127)</h2>
+      <h2>Color Sequence (0-255)</h2>
       <div class="cIn">
         <input type="radio" disabled="disabled" />
         <input type="text" value="R" size="3" disabled="disabled" />
@@ -88,7 +88,7 @@ h1
       </div>
       <div class="cIn">
         <input type="radio" name="color" value="0" />
-        <input type="text" name="c0r" id="c0r" value="127" size="3" onblur="updateColor(0)"/>
+        <input type="text" name="c0r" id="c0r" value="255" size="3" onblur="updateColor(0)"/>
         <input type="text" name="c0g" id="c0g" value="0" size="3" onblur="updateColor(0)"/>
         <input type="text" name="c0b" id="c0b" value="0" size="3" onblur="updateColor(0)"/>
       </div>
@@ -96,7 +96,7 @@ h1
       <div class="cIn">
         <input type="radio" name="color" value="1" />
         <input type="text" name="c1r" id="c1r" value="0" size="3" onblur="updateColor(1)"/>
-        <input type="text" name="c1g" id="c1g" value="127" size="3" onblur="updateColor(1)"/>
+        <input type="text" name="c1g" id="c1g" value="255" size="3" onblur="updateColor(1)"/>
         <input type="text" name="c1b" id="c1b" value="0" size="3" onblur="updateColor(1)"/>
       </div>
       <div id="blk1" class="cOut"></div><br/>
@@ -104,7 +104,7 @@ h1
         <input type="radio" name="color" value="2" checked="checked" />
         <input type="text" name="c2r" id="c2r" value="0" size="3" onblur="updateColor(2)"/>
         <input type="text" name="c2g" id="c2g" value="0" size="3" onblur="updateColor(2)"/>
-        <input type="text" name="c2b" id="c2b" value="127" size="3" onblur="updateColor(2)"/>
+        <input type="text" name="c2b" id="c2b" value="255" size="3" onblur="updateColor(2)"/>
       </div>
       <div id="blk2" class="cOut"></div><br/>
       <div class="cIn">
@@ -116,30 +116,30 @@ h1
       <div id="blk3" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="4" checked="checked" />
-        <input type="text" name="c4r" id="c4r" value="127" size="3" onblur="updateColor(4)"/>
-        <input type="text" name="c4g" id="c4g" value="127" size="3" onblur="updateColor(4)"/>
+        <input type="text" name="c4r" id="c4r" value="255" size="3" onblur="updateColor(4)"/>
+        <input type="text" name="c4g" id="c4g" value="255" size="3" onblur="updateColor(4)"/>
         <input type="text" name="c4b" id="c4b" value="0" size="3" onblur="updateColor(4)"/>
       </div>
       <div id="blk4" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="5" checked="checked" />
-        <input type="text" name="c5r" id="c5r" value="127" size="3" onblur="updateColor(5)"/>
+        <input type="text" name="c5r" id="c5r" value="255" size="3" onblur="updateColor(5)"/>
         <input type="text" name="c5g" id="c5g" value="0" size="3" onblur="updateColor(5)"/>
-        <input type="text" name="c5b" id="c5b" value="127" size="3" onblur="updateColor(5)"/>
+        <input type="text" name="c5b" id="c5b" value="255" size="3" onblur="updateColor(5)"/>
       </div>
       <div id="blk5" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="6" checked="checked" />
         <input type="text" name="c6r" id="c6r" value="0" size="3" onblur="updateColor(6)"/>
-        <input type="text" name="c6g" id="c6g" value="127" size="3" onblur="updateColor(6)"/>
-        <input type="text" name="c6b" id="c6b" value="127" size="3" onblur="updateColor(6)"/>
+        <input type="text" name="c6g" id="c6g" value="255" size="3" onblur="updateColor(6)"/>
+        <input type="text" name="c6b" id="c6b" value="255" size="3" onblur="updateColor(6)"/>
       </div>
       <div id="blk6" class="cOut"></div><br/>
       <div class="cIn">
         <input type="radio" name="color" value="7" checked="checked" />
-        <input type="text" name="c7r" id="c7r" value="64" size="3" onblur="updateColor(7)"/>
-        <input type="text" name="c7g" id="c7g" value="64" size="3" onblur="updateColor(7)"/>
-        <input type="text" name="c7b" id="c7b" value="64" size="3" onblur="updateColor(7)"/>
+        <input type="text" name="c7r" id="c7r" value="127" size="3" onblur="updateColor(7)"/>
+        <input type="text" name="c7g" id="c7g" value="127" size="3" onblur="updateColor(7)"/>
+        <input type="text" name="c7b" id="c7b" value="127" size="3" onblur="updateColor(7)"/>
       </div>
       <div id="blk7" class="cOut"></div><br/>
     </div>

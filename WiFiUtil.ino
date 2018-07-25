@@ -318,9 +318,9 @@ void sendIndex()
   sendChunkln(F("<script type=\"text/javascript\" language=\"javascript\"><!--"));
   sendChunk  (F("function updateAll(){for(var i=0; i<"));sendChunk(maxSeqLen);sendChunkln(F("; i++){updateColor(i);}}"));
   sendChunkln(F("function updateColor(idx){var target = document.getElementById(\"blk\"+idx);"));
-  sendChunkln(F("var r = parseInt(document.getElementById(\"c\"+idx+\"r\").value)*2;"));
-  sendChunkln(F("var g = parseInt(document.getElementById(\"c\"+idx+\"g\").value)*2;"));
-  sendChunkln(F("var b = parseInt(document.getElementById(\"c\"+idx+\"b\").value)*2;"));
+  sendChunkln(F("var r = parseInt(document.getElementById(\"c\"+idx+\"r\").value);"));
+  sendChunkln(F("var g = parseInt(document.getElementById(\"c\"+idx+\"g\").value);"));
+  sendChunkln(F("var b = parseInt(document.getElementById(\"c\"+idx+\"b\").value);"));
   sendChunkln(F("target.style.backgroundColor = \"#\" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);}"));
   sendChunkln(F("--></script><style type=\"text/css\">h1{padding-top:20px;margin-bottom:0px;}"));
   sendChunkln(F(".cIn{float:left;clear:left;} .cOut{width:20px;height:20px;overflow:visible;float:left;}"));
@@ -361,7 +361,7 @@ void sendIndex()
   sendChunkln(F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"));
   sendChunkln(F("</head>"));
   sendChunkln(F("<body onload=\"updateAll()\"><form action=\"\" method=\"post\">"));
-  sendChunkln(F("<div class=\"gridArea\"><h1 class=\"chead\">Colors</h1><div class=\"cseq\"><h2>Color Sequence (0-127)</h2>"));
+  sendChunkln(F("<div class=\"gridArea\"><h1 class=\"chead\">Colors</h1><div class=\"cseq\"><h2>Color Sequence (0-255)</h2>"));
   sendChunkln(F("<div class=\"cIn\"><input type=\"radio\" disabled=\"disabled\" />"));
   sendChunkln(F("<input type=\"text\" value=\"R\" size=\"3\" disabled=\"disabled\" />"));
   sendChunkln(F("<input type=\"text\" value=\"G\" size=\"3\" disabled=\"disabled\" />"));
@@ -396,7 +396,7 @@ void sendIndex()
       sendChunk(F("<input type=\"text\" name=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" id=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" value=\""));
-      mask = 0x7F;
+      mask = 0xFF;
       mask = mask<<shifts[j];
       sendChunk(itoa((LEDSeq[i]&mask)>>shifts[j],wifiBuff+6,10));
       sendChunk(F("\" size=\"3\" onblur=\"updateColor("));

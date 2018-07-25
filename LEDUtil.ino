@@ -82,14 +82,14 @@ void stripSetup()
   LEDSeq[i++] = strip.Color(  0,  0,  0);//black
   LEDSeq[i++] = strip.Color( 5, 5, 5);
   LEDSeq[i++] = strip.Color( 10, 10, 10);
-  LEDSeq[i++] = strip.Color( 20, 20, 20);
-  LEDSeq[i++] = strip.Color(127,127,127);//white
-  LEDSeq[i++] = strip.Color(127,  0,  0);//red
-  LEDSeq[i++] = strip.Color(127,127,  0);//yellow
-  LEDSeq[i++] = strip.Color(  0,127,  0);//green
-  LEDSeq[i++] = strip.Color(  0,127,127);//teal
-  LEDSeq[i++] = strip.Color(  0,  0,127);//blue
-  LEDSeq[i++] = strip.Color(127, 0,127);//purple
+  LEDSeq[i++] = strip.Color(127,127,127);
+  LEDSeq[i++] = strip.Color(255,255,255);//white
+  LEDSeq[i++] = strip.Color(255,  0,  0);//red
+  LEDSeq[i++] = strip.Color(255,255,  0);//yellow
+  LEDSeq[i++] = strip.Color(  0,255,  0);//green
+  LEDSeq[i++] = strip.Color(  0,255,255);//teal
+  LEDSeq[i++] = strip.Color(  0,  0,255);//blue
+  LEDSeq[i++] = strip.Color(255,  0,255);//purple
   LEDSeqLen = i;
   
   #if PRINT_DEBUGGING_LED
@@ -180,7 +180,7 @@ void Transition()
   //can scale future animation loops to better match the desired timing
   long start = millis();
   
-  uint32_t intermed_color = 0xFFFFFFFF;
+  uint32_t intermed_color = 0;
   
   //takes roughly 24ms to set all pixels in a 5m strand
   //+2 to ensure we at least do the update
@@ -262,17 +262,16 @@ void Transition()
       #if PRINT_DEBUGGING_LED
       debugSerial.println(F("Flashing..."));
       #endif
-      intermed_color = 0x7F7F7F;
+      intermed_color = strip.Color(255,255,255);
       //no break - fallthrough intended
     }
     case TRANS_PULSE:
     {
-      if(intermed_color == 0xFFFFFFFF)
+      if(intermed_color == 0)
       {
         #if PRINT_DEBUGGING_LED
         debugSerial.println(F("Pulsing..."));
         #endif
-        intermed_color = 0;
       }
       float fraction;
       for(int i=0; i<=numStepsInTrans/2; i++)
@@ -840,14 +839,14 @@ void LEDquickTest()
   strip.setPixelColor(0,  0,  0,  0);//black
   strip.setPixelColor(1,  5,  5,  5);
   strip.setPixelColor(2, 10, 10, 10);
-  strip.setPixelColor(3, 20, 20, 20);
-  strip.setPixelColor(4,127,127,127);//white
-  strip.setPixelColor(5,127,  0,  0);//red
-  strip.setPixelColor(6,127,127,  0);//yellow
-  strip.setPixelColor(7,  0,127,  0);//green
-  strip.setPixelColor(8,  0,127,127);//teal
-  strip.setPixelColor(9,  0,  0,127);//blue
-  strip.setPixelColor(10,127, 0,127);//purple
+  strip.setPixelColor(3,127,127,127);
+  strip.setPixelColor(4,255,255,255);//white
+  strip.setPixelColor(5,255,  0,  0);//red
+  strip.setPixelColor(6,255,255,  0);//yellow
+  strip.setPixelColor(7,  0,255,  0);//green
+  strip.setPixelColor(8,  0,255,255);//teal
+  strip.setPixelColor(9,  0,  0,255);//blue
+  strip.setPixelColor(10,255, 0,255);//purple
   for(int i=0; i<numLEDs; ++i)
   {
     strip.show();
