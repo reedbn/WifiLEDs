@@ -727,6 +727,8 @@ void resetStrip()
   //Reset the IIR filter
   timeScaler.reset();
 
+  frameNum = 0;//Important for the None animation
+
   stripParamsUpdated = false;
 }
 
