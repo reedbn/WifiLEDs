@@ -12,10 +12,10 @@
 const char* ssid = "RFish";
 const char* pass = "NotUrFish";
 const IPAddress apIP(192,168,4,1);
-#define STRIP_MAX_REFRESH_HZ 20
+#define STRIP_MAX_REFRESH_HZ 60
 
 #define PRINT_DEBUGGING_LED (0)
-#define PRINT_DEBUGGING_WIFLY (1)
+#define PRINT_DEBUGGING_WIFLY (0)
 #define PRINT_DEBUGGING_WIFLY_DETAIL (0)
 
 Ticker stripTicker;
