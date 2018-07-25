@@ -219,7 +219,7 @@ void Transition()
       #if PRINT_DEBUGGING_LED
       debugSerial.println(F("Fading..."));
       #endif
-      for(uint8_t i=0; i<=numStepsInTrans; i++)
+      for(unsigned int i=0; i<=numStepsInTrans; i++)
       {
         float fraction = 1.0*(numStepsInTrans - i)/numStepsInTrans;
         for(uint8_t j=0; j<numLEDs; j++)
