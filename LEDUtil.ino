@@ -40,43 +40,6 @@ void stripSetup()
   //Start the strip driver
   strip.begin();
   
-  //Test routine for debugging strip
-  /*while(1)
-  {
-    debugSerial.println("Clearing");
-    clearStrip();
-    delay(50);
-    debugSerial.println("Setting");
-    for(int i=0; i<numLEDs; i++)
-      strip.setPixelColor(i,127,127,127);
-    strip.show();
-    delay(50);
-  }*/
-  
-  //Test routine for debugging strip
-  /*(while(1)
-  {
-    for(int i = 0; i < 41; i++)
-    {
-      float frac = i*1.0/20;
-      if(20 < i)
-        frac = 2-frac;
-      
-      //float factor = frac;//linear
-      float factor = (pow(10,frac)-1+frac)/10;//Exponential
-      
-      byte val = factor * 0x7F;
-      strip.setPixelColor(0,val,val,val);
-      strip.show();
-      debugSerial.print(frac);
-      debugSerial.print(F("\t"));
-      debugSerial.print(factor);
-      debugSerial.print(F("\t"));
-      debugSerial.println(val);
-      delay(20);
-    }
-  }*/
-  
   //Initialize the LED sequence to be displayed
   int i = 0;
   LEDSeq[i++] = strip.Color(  0,  0,  0);//black
@@ -153,13 +116,6 @@ void stripLoop()
   //Transition to the new display
   Transition();
   
-  //Manual no transition update for debugging
-  /*for(int i=0; i<numLEDs; i++)
-  {
-    strip.setPixelColor(i,LEDNext[i]);
-  }
-  strip.show();*/
-  
   //Software interrupt
   yield();
   if(stripParamsUpdated)
@@ -232,16 +188,6 @@ void Transition()
         for(uint8_t j=0; j<numLEDs; j++)
         {
           uint32_t tmp_color = LinInterp(LEDNow[j],LEDNext[j],fraction);
-          /*if(LEDNext[j] == 0x8A8A8A)
-          {
-            debugSerial.print(strip.getPixelColor(j),HEX);
-            debugSerial.print(F("\t"));
-            debugSerial.print(LEDNext[j]&0x7F7F7F,HEX);
-            debugSerial.print(F("\t"));
-            debugSerial.print(fraction,6);
-            debugSerial.print(F("\t"));
-            debugSerial.println(tmp_color&0x7F7F7F,HEX);
-          }*/
           
           strip.setPixelColor(j,tmp_color);
           
@@ -761,12 +707,9 @@ uint32_t Wheel(uint16_t WheelPos)//0<=WheelPos<=384
   return(strip.Color(r,g,b));
 }
 
+//fraction of 0 -> all color2, fraction of 1 -> all color1
 uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
 {
-  /*if(fraction == 1.0)
-    return color1;
-  if(fraction == 0.0)
-    return color2;*/
   byte r1 = (color1 >> 16);
   byte g1 = (color1 >>  8);
   byte b1 = (color1      );
@@ -774,56 +717,18 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte g2 = (color2 >>  8);
   byte b2 = (color2      );
   
-  if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2)
+  if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2){
     fraction = (pow(2,fraction)-1);//Exponential
-  else
+  }
+  else{
     fraction = log10(9*fraction + 1);
+  }
 
   byte r = round(fraction*r1 + (1-fraction)*r2);
   byte g = round(fraction*g1 + (1-fraction)*g2);
   byte b = round(fraction*b1 + (1-fraction)*b2);
-  /*byte g = 127*pow(1000,((1-fraction)*(g2-g1))/127.0)/1000 + g1;
-  byte r = 127*pow(1000,((1-fraction)*(r2-r1))/127.0)/1000 + r1;
-  byte b = 127*pow(1000,((1-fraction)*(b2-b1))/127.0)/1000 + b1;*/
-  /*byte g = pmap(g1,g2,fraction);
-  byte r = pmap(r1,r2,fraction);
-  byte b = pmap(b1,b2,fraction);*/
-  /*if(r2 == 20 && b2 == 20 && g2 == 20)
-  {
-    debugSerial.print(fraction,6);
-    debugSerial.print(F("\t"));
-    debugSerial.print((1.0-fraction),6);
-    debugSerial.print(F("\t"));
-    debugSerial.print((1.0-fraction)*(b2-b1),6);
-    debugSerial.print(F("\t"));
-    debugSerial.print(((1.0-fraction)*(b2-b1))/127.0);
-    debugSerial.print(F("\t"));
-    debugSerial.print((fraction*(b2-b1))/127.0);
-    debugSerial.print(F("\t"));
-    debugSerial.print(r);
-    debugSerial.print(F("\t"));
-    debugSerial.print(g);
-    debugSerial.print(F("\t"));
-    debugSerial.println(b);
-  }*/
-  return(strip.Color(r,g,b));
-}
 
-byte pmap(byte c1, byte c2, float fraction)
-{
-  byte cout = fraction*c1 + (1-fraction)*c2;
-  float factor = (pow(10,cout/127.0)-1 + (cout/127.0) )/10;//Exponential
-  /*if(c2 == 20)
-  {
-    debugSerial.print(fraction);
-    debugSerial.print(F("\t"));
-    debugSerial.print(cout);
-    debugSerial.print(F("\t"));
-    debugSerial.print(factor);
-    debugSerial.print(F("\t"));
-    debugSerial.println(factor * 0x7F);
-  }*/
-  return factor * 0x7F;
+  return(strip.Color(r,g,b));
 }
 
 extern "C" {
@@ -833,31 +738,3 @@ int freeRam () {
   return system_get_free_heap_size();
 }
 
-void LEDquickTest()
-{
-  #if PRINT_DEBUGGING_LED
-  debugSerial.println(F("Running LEDquickTest()"));
-  #endif
-  strip.setPixelColor(0,  0,  0,  0);//black
-  strip.setPixelColor(1,  5,  5,  5);
-  strip.setPixelColor(2, 10, 10, 10);
-  strip.setPixelColor(3,127,127,127);
-  strip.setPixelColor(4,255,255,255);//white
-  strip.setPixelColor(5,255,  0,  0);//red
-  strip.setPixelColor(6,255,255,  0);//yellow
-  strip.setPixelColor(7,  0,255,  0);//green
-  strip.setPixelColor(8,  0,255,255);//teal
-  strip.setPixelColor(9,  0,  0,255);//blue
-  strip.setPixelColor(10,255, 0,255);//purple
-  for(int i=0; i<numLEDs; ++i)
-  {
-    strip.show();
-    for(int j=numLEDs; j>0; --j)
-      strip.setPixelColor(j,strip.getPixelColor(j-1));
-    delay(10);
-  }
-  clearStrip();
-  strip.setPixelColor(numLEDs-1,127,127,127);
-  strip.show();
-  delay(1000);
-}
