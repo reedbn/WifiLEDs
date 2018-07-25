@@ -7,6 +7,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDs, LEDdataPin, NEO_GRB + NEO_K
 
 //Create some arrays to store desired colors
 uint32_t LEDSeq [maxSeqLen];
+uint32_t LEDNow [numLEDs];
 uint32_t LEDNext [numLEDs];
 
 //Create some enumerations of display options
@@ -175,6 +176,10 @@ void stripLoop()
 
 void Transition()
 {
+  //This will keep track of how long it takes to run the animation, so we
+  //can scale future animation loops to better match the desired timing
+  long start = millis();
+  
   uint32_t intermed_color = 0xFFFFFFFF;
   
   //takes roughly 24ms to set all pixels in a 5m strand
@@ -185,10 +190,11 @@ void Transition()
   debugSerial.print(numStepsInTrans);
   debugSerial.println(F(" frames"));
   #endif
-  
-  //This will keep track of how long it takes to run the animation, so we
-  //can scale future animation loops to better match the desired timing
-  long start = millis();
+
+  //Save all of the current colors
+  for(unsigned int i=0; i < numLEDs; ++i){
+    LEDNow[i] = strip.getPixelColor(i);
+  }
   
   switch(transMode)
   {
@@ -211,6 +217,7 @@ void Transition()
       }
       
       strip.show();
+      delay(transTime);
       break;
     }
     
@@ -224,7 +231,7 @@ void Transition()
         float fraction = 1.0*(numStepsInTrans - i)/numStepsInTrans;
         for(uint8_t j=0; j<numLEDs; j++)
         {
-          uint32_t tmp_color = LinInterp(strip.getPixelColor(j),LEDNext[j],fraction);
+          uint32_t tmp_color = LinInterp(LEDNow[j],LEDNext[j],fraction);
           /*if(LEDNext[j] == 0x8A8A8A)
           {
             debugSerial.print(strip.getPixelColor(j),HEX);
@@ -273,7 +280,7 @@ void Transition()
         fraction = 1.0*(numStepsInTrans/2 - i)/(numStepsInTrans/2);
         for(int j=0; j<numLEDs; j++)
         {
-          strip.setPixelColor(j,LinInterp(strip.getPixelColor(j),intermed_color,fraction));
+          strip.setPixelColor(j,LinInterp(LEDNow[j],intermed_color,fraction));
           
           //Software interrupt
           yield();
@@ -759,15 +766,15 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
     return color1;
   if(fraction == 0.0)
     return color2;*/
-  byte r1 = (color1 >> 16)&0x7F;
-  byte g1 = (color1 >>  8)&0x7F;
-  byte b1 = (color1      )&0x7F;
-  byte r2 = (color2 >> 16)&0x7F;
-  byte g2 = (color2 >>  8)&0x7F;
-  byte b2 = (color2      )&0x7F;
+  byte r1 = (color1 >> 16);
+  byte g1 = (color1 >>  8);
+  byte b1 = (color1      );
+  byte r2 = (color2 >> 16);
+  byte g2 = (color2 >>  8);
+  byte b2 = (color2      );
   
   if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2)
-    fraction = (pow(1000,fraction)-1 + fraction )/1000;//Exponential
+    fraction = (pow(2,fraction)-1);//Exponential
   else
     fraction = log10(9*fraction + 1);
 
