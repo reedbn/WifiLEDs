@@ -516,7 +516,7 @@ void Snake()
   long trailing_pixel = offset - dir_fact;
   if(dirMode == DIR_L)
   {
-    trailing_pixel = trailing_pixel + LEDSeqLen - 1;
+    trailing_pixel = trailing_pixel + patternLen - 1;
   }
   if(trailing_pixel < 0)
   {
