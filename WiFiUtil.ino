@@ -409,7 +409,7 @@ void sendIndex()
 
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
-  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" />Width<br/>"));
+  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
     /*<input type="radio" name="color" value="p0" />Holiday<br/>
       <input type="radio" name="color" value="p1" />Patriotic<br/>
       <input type="radio" name="color" value="p2" />Halloween<br/>
