@@ -181,6 +181,14 @@ void processPost()
       debugSerial.println(animMode);
       #endif
     }
+    else if(key.compareTo(F("snakeLen")) == 0){
+      snakeLen = atoi(val);
+
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed snakeLen: "));
+      debugSerial.println(snakeLen);
+      #endif
+    }
     else if(key.compareTo(F("twinklePer")) == 0){
       twinkleThresh = atoi(val);
       
@@ -423,7 +431,8 @@ void sendIndex()
   sendChunkln(F("<h1 class=\"ahead\">Animation</h1><div class=\"astyle\"><h2>Style</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a0\""));if(animMode==ANIM_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake<br/>"));
+  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake "));
+  sendChunk  (F("<input type=\"number\" name=\"snakeLen\" value=\""));sendChunk(snakeLen);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" /> long<br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
   sendChunk  (F("<input type=\"number\" name=\"twinklePer\" value=\""));sendChunk(twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
   
