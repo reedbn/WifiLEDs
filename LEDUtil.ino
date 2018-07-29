@@ -523,11 +523,7 @@ void Snake()
     offset -= settings.patternLen;
   }
 
-  long trailing_pixel = frameNum*dir_fact - dir_fact;
-  if(settings.dirMode == DIR_L)
-  {
-    trailing_pixel = trailing_pixel + settings.snakeLen - 1;
-  }
+  long trailing_pixel = frameNum*dir_fact;
   while(trailing_pixel < 0)
   {
     trailing_pixel = trailing_pixel + numLEDs;
@@ -546,10 +542,13 @@ void Snake()
   
   for(int i=0; i < settings.snakeLen; i++)
   {
-    uint16_t dest_idx = trailing_pixel + 1 + i;
+    int16_t dest_idx = trailing_pixel + dir_fact*(1 + i);
     while(dest_idx >= numLEDs)
     {
       dest_idx = dest_idx - numLEDs;
+    }
+    while(dest_idx < 0){
+      dest_idx = dest_idx + numLEDs;
     }
     if(settings.patternMode == PATTERN_SERIAL)
     {
