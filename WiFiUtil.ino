@@ -373,6 +373,7 @@ void sendIndex()
   sendChunkln(F("var g = parseInt(document.getElementById(\"c\"+idx+\"g\").value);"));
   sendChunkln(F("var b = parseInt(document.getElementById(\"c\"+idx+\"b\").value);"));
   sendChunkln(F("target.style.backgroundColor = \"#\" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);}"));
+  sendChunkln(F("function nameChecker(){var elements = document.getElementsByName(\"save_idx\");for(var i=0; i < elements.length; i++){if(elements[i].value==\"-1\"){continue;} elements[i].addEventListener('click', function(){document.getElementById(\"name\").required=true;}, false);}}"));
   sendChunkln(F("--></script><style type=\"text/css\">h1{padding-top:20px;margin-bottom:0px;}"));
   sendChunkln(F(".cIn{float:left;clear:left;} .cOut{width:20px;height:20px;overflow:visible;float:left;}"));
   sendChunkln(F("input{width: 3em;}"));
@@ -412,7 +413,7 @@ void sendIndex()
   sendChunkln(F("</style>"));
   sendChunkln(F("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"));
   sendChunkln(F("</head>"));
-  sendChunkln(F("<body onload=\"updateAll()\"><form action=\"\" method=\"post\">"));
+  sendChunkln(F("<body onload=\"updateAll();nameChecker();\"><form action=\"\" method=\"post\">"));
   sendChunkln(F("<div class=\"gridArea\"><h1 class=\"chead\">Colors</h1><div class=\"cseq\"><h2>Color Sequence (0-255)</h2>"));
   sendChunkln(F("<div class=\"cIn\"><input type=\"radio\" disabled=\"disabled\" />"));
   sendChunkln(F("<input type=\"text\" value=\"R\" disabled=\"disabled\" />"));
@@ -507,7 +508,7 @@ void sendIndex()
   sendChunk  (F("<input required type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
   sendChunkln(F("<div class=\"savebuttons\"><h2>Store as named setting?</h2>"));
-  sendChunk  (F("<input required type=\"text\" name=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
+  sendChunk  (F("<input type=\"text\" name=\"name\" id=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no<br/>"));
   for(int i = 0; i < MAX_NUM_USER_SETTINGS; ++i){
     sendChunk(F("<input type=\"radio\" name=\"save_idx\" value=\""));sendChunk(i);sendChunk(F("\" />"));sendChunk(i);sendChunk(F(" "));
