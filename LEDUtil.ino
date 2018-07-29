@@ -1,4 +1,3 @@
-#include <Adafruit_NeoPixel.h>
 #include <IIRFilter.h>
 
 #include "config.h"
@@ -6,12 +5,13 @@
 
 #define debugSerial Serial
 
-//Setup the strip driver
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDs, LEDdataPin, NEO_GRB + NEO_KHZ800);
-
 //Create some arrays to store desired colors
+CRGB LEDs[numLEDs];
 uint32_t LEDNow [numLEDs];
 uint32_t LEDNext [numLEDs];
+
+//This is our reference to the LED driver
+CLEDController* strip;
 
 //Create a storage location for all display functions to use
 unsigned int frameNum = 0;
@@ -19,24 +19,38 @@ IIRFilter timeScaler = IIRFilter(0.8,10.0);//alpha, starting value
 
 volatile bool stripParamsUpdated;
 
+uint32_t RgbNum(uint8_t r, uint8_t g, uint8_t b)
+{
+  return (uint32_t)0 | (r<<16) | (g<<8) | b;
+}
+
+uint32_t CRGB2Num(CRGB& c)
+{
+  return (uint32_t)0 | (c.r<<16) | (c.g<<8) | c.b;
+}
+
 void stripSetup()
 {
-  //Start the strip driver
-  strip.begin();
+  //Initialize the strip driver
+  #if(0 <= LED_CLOCK_PIN)
+  strip = &FastLED.addLeds<LED_STRIP_TYPE,LEDdataPin,LED_CLOCK_PIN>(LEDs, numLEDs);
+  #else
+  strip = &FastLED.addLeds<LED_STRIP_TYPE,LEDdataPin>(LEDs, numLEDs);
+  #endif
   
   //Initialize the LED sequence to be displayed
   int i = 0;
-  settings.LEDSeq[i++] = strip.Color(  0,  0,  0);//black
-  settings.LEDSeq[i++] = strip.Color( 5, 5, 5);
-  settings.LEDSeq[i++] = strip.Color( 10, 10, 10);
-  settings.LEDSeq[i++] = strip.Color(127,127,127);
-  settings.LEDSeq[i++] = strip.Color(255,255,255);//white
-  settings.LEDSeq[i++] = strip.Color(255,  0,  0);//red
-  settings.LEDSeq[i++] = strip.Color(255,255,  0);//yellow
-  settings.LEDSeq[i++] = strip.Color(  0,255,  0);//green
-  settings.LEDSeq[i++] = strip.Color(  0,255,255);//teal
-  settings.LEDSeq[i++] = strip.Color(  0,  0,255);//blue
-  settings.LEDSeq[i++] = strip.Color(255,  0,255);//purple
+  settings.LEDSeq[i++] = RgbNum(  0,  0,  0);//black
+  settings.LEDSeq[i++] = RgbNum( 5, 5, 5);
+  settings.LEDSeq[i++] = RgbNum( 10, 10, 10);
+  settings.LEDSeq[i++] = RgbNum(127,127,127);
+  settings.LEDSeq[i++] = RgbNum(255,255,255);//white
+  settings.LEDSeq[i++] = RgbNum(255,  0,  0);//red
+  settings.LEDSeq[i++] = RgbNum(255,255,  0);//yellow
+  settings.LEDSeq[i++] = RgbNum(  0,255,  0);//green
+  settings.LEDSeq[i++] = RgbNum(  0,255,255);//teal
+  settings.LEDSeq[i++] = RgbNum(  0,  0,255);//blue
+  settings.LEDSeq[i++] = RgbNum(255,  0,255);//purple
   settings.LEDSeqLen = i;
   settings.snakeLen = settings.LEDSeqLen;
   memcpy(settings.name,"Default",sizeof(settings.name));
@@ -150,7 +164,7 @@ void Transition()
 
   //Save all of the current colors
   for(unsigned int i=0; i < numLEDs; ++i){
-    LEDNow[i] = strip.getPixelColor(i);
+    LEDNow[i] = CRGB2Num(LEDs[i]);
   }
   
   switch(settings.transMode)
@@ -163,7 +177,7 @@ void Transition()
       #endif
       for(int i=0; i<numLEDs; i++)
       {
-        strip.setPixelColor(i,LEDNext[i]);
+        LEDs[i] = LEDNext[i];
         
         //Software interrupt
         yield();
@@ -173,7 +187,7 @@ void Transition()
         }
       }
       
-      strip.show();
+      strip->showLeds();
       delay(settings.transTime);
       break;
     }
@@ -188,9 +202,7 @@ void Transition()
         float fraction = 1.0*(numStepsInTrans - i)/numStepsInTrans;
         for(uint8_t j=0; j<numLEDs; j++)
         {
-          uint32_t tmp_color = LinInterp(LEDNow[j],LEDNext[j],fraction);
-          
-          strip.setPixelColor(j,tmp_color);
+          LEDs[j] = LinInterp(LEDNow[j],LEDNext[j],fraction);
           
           //Software interrupt
           yield();
@@ -199,7 +211,7 @@ void Transition()
             return;
           }
         }
-        strip.show();
+        strip->showLeds();
       }
       break;
     }
@@ -209,7 +221,7 @@ void Transition()
       #if PRINT_DEBUGGING_LED
       debugSerial.println(F("Flashing..."));
       #endif
-      intermed_color = strip.Color(255,255,255);
+      intermed_color = RgbNum(255,255,255);
       //no break - fallthrough intended
     }
     case TRANS_PULSE:
@@ -226,7 +238,7 @@ void Transition()
         fraction = 1.0*(numStepsInTrans/2 - i)/(numStepsInTrans/2);
         for(int j=0; j<numLEDs; j++)
         {
-          strip.setPixelColor(j,LinInterp(LEDNow[j],intermed_color,fraction));
+          LEDs[j] = LinInterp(LEDNow[j],intermed_color,fraction);
           
           //Software interrupt
           yield();
@@ -235,14 +247,14 @@ void Transition()
             return;
           }
         }
-        strip.show();
+        strip->showLeds();
       }
       for(int i=0; i<=numStepsInTrans/2; i++)
       {
         fraction = 1.0*(numStepsInTrans/2 - i)/(numStepsInTrans/2);
         for(int j=0; j<numLEDs; j++)
         {
-          strip.setPixelColor(j,LinInterp(intermed_color,LEDNext[j],fraction));
+          LEDs[j] = LinInterp(intermed_color,LEDNext[j],fraction);
           //Software interrupt
           yield();
           if(stripParamsUpdated)
@@ -250,7 +262,7 @@ void Transition()
             return;
           }
         }
-        strip.show();
+        strip->showLeds();
       }
       break;
     }
@@ -707,7 +719,7 @@ void clearStrip()
 {
   for(int i=0; i<numLEDs; ++i)
   {
-    strip.setPixelColor(i,0,0,0);
+    LEDs[i].setRGB(0,0,0);
     
     //Software interrupt
     yield();
@@ -716,7 +728,7 @@ void clearStrip()
       return;
     }
   }
-  strip.show();
+  strip->showLeds();
 }
 
 void clearLEDNext()
@@ -738,10 +750,10 @@ void resetStrip()
 {
   for(int i=0; i<numLEDs; ++i)
   {
-    strip.setPixelColor(i,0,0,0);
+    LEDs[i].setRGB(0,0,0);
     LEDNext[i] = 0;
   }
-  strip.show();
+  strip->showLeds();
   
   //Reset the IIR filter
   timeScaler.reset();
@@ -795,7 +807,7 @@ uint32_t Wheel(uint16_t WheelPos)//0<=WheelPos<=3*WHEEL_PRECISION
       g = 0;
       b = 0;
   }
-  return(strip.Color(r,g,b));
+  return(RgbNum(r,g,b));
 }
 
 //fraction of 0 -> all color2, fraction of 1 -> all color1
@@ -819,7 +831,7 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte g = round(fraction*g1 + (1-fraction)*g2);
   byte b = round(fraction*b1 + (1-fraction)*b2);
 
-  return(strip.Color(r,g,b));
+  return(RgbNum(r,g,b));
 }
 
 extern "C" {

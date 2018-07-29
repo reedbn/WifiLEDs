@@ -152,16 +152,16 @@ void processPost()
       int cidx = atoi(key.c_str()+1);//skip the 'c' when doing atoi
       switch(key.charAt(key.length()-1)){
         case 'r':
-          settings.LEDSeq[cidx] &= ~(strip.Color(255,0,0));
-          settings.LEDSeq[cidx] |= strip.Color(atoi(val),0,0);
+          settings.LEDSeq[cidx] &= ~((uint32_t)0xFF<<16);
+          settings.LEDSeq[cidx] |= (atoi(val)<<16);
           break;
         case 'g':
-          settings.LEDSeq[cidx] &= ~(strip.Color(0,255,0));
-          settings.LEDSeq[cidx] |= strip.Color(0,atoi(val),0);
+          settings.LEDSeq[cidx] &= ~((uint32_t)0xFF<<8);
+          settings.LEDSeq[cidx] |= (atoi(val)<<8);
           break;
         case 'b':
-          settings.LEDSeq[cidx] &= ~(strip.Color(0,0,255));
-          settings.LEDSeq[cidx] |= strip.Color(0,0,atoi(val));
+          settings.LEDSeq[cidx] &= ~((uint32_t)0xFF);
+          settings.LEDSeq[cidx] |= atoi(val);
           break;
         default:
           debugSerial.print("Unknown color in key \"");
