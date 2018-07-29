@@ -439,7 +439,7 @@ void sendIndex()
     debugSerial.print(F("Sequence Color @"));
     debugSerial.print(i,DEC);
     debugSerial.print(F(": "));
-    debugSerial.println(LEDSeq[i],HEX);
+    debugSerial.println(settings.LEDSeq[i],HEX);
     #endif
       
     //Iterate over colors (RGB)
@@ -466,7 +466,7 @@ void sendIndex()
     char setting_name[8];
     while(available_settings[asi] != 0xFF){
       uint8_t setting_index = available_settings[asi];
-      sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"p"));sendChunk(available_settings[setting_index]);sendChunk(F("\" />"));
+      sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"p"));sendChunk(setting_index);sendChunk(F("\" />"));
       GetSettingName(setting_index,setting_name);
       sendChunk  (setting_name);
       sendChunkln(F("<br/>"));
@@ -506,12 +506,22 @@ void sendIndex()
   sendChunk  (F("<input type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(settings.transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
   sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
-  sendChunkln(F("<div class=\"savebuttons\">"));
-  sendChunk  (F("Store as named setting? "));
-  sendChunk  (F("<input type=\"text\" name=\"name\" value=\"Preset\" max=\"8\" /> "));
-  sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no "));
+  sendChunkln(F("<div class=\"savebuttons\"><h2>Store as named setting?</h2>"));
+  sendChunk  (F("<input type=\"text\" name=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
+  sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no<br/>"));
   for(int i = 0; i < MAX_NUM_USER_SETTINGS; ++i){
     sendChunk(F("<input type=\"radio\" name=\"save_idx\" value=\""));sendChunk(i);sendChunk(F("\" />"));sendChunk(i);sendChunk(F(" "));
+    char name[8];
+    uint8_t avail_idx = 0;
+    while(available_settings[avail_idx] != 0xFF){
+      if(available_settings[avail_idx] == i){
+        GetSettingName(i,name);
+        sendChunk(F("(currently \""));sendChunk(name);sendChunk(F("\")"));
+        break;
+      }
+      ++avail_idx;
+    }
+    sendChunkln(F("<br/>"));
   }
   sendChunkln(F("<br/>"));
   sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;width:auto;\"/>"));

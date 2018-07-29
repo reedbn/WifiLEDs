@@ -18,6 +18,7 @@ enum {DIR_L, DIR_R, DIR_OUT, DIR_IN};
 enum {TRANS_NONE, TRANS_PULSE, TRANS_FLASH, TRANS_FADE};
 
 struct settings_t{
+  uint8_t header;//magic header number expected
   char name[8];//7 characters + \0
   uint32_t LEDSeq [maxSeqLen];
   uint16_t LEDSeqLen;
