@@ -115,11 +115,13 @@ void processPost()
     String key = server.argName(i);
     String valstr = server.arg(i);
     const char* val = valstr.c_str();
+    #if PRINT_DEBUGGING_WIFLY
     debugSerial.print(key);
     debugSerial.print(": ");
     debugSerial.print(val);
     debugSerial.print("=");
     debugSerial.println(atoi(val));
+    #endif
 
     if(key.compareTo(F("color")) == 0){
       if(val[0] == 'r')
@@ -436,7 +438,7 @@ void sendIndex()
     else
       sendChunkln(F("\" />"));
     
-    #if PRINT_DEBUGGING_WIFLY  
+    #if PRINT_DEBUGGING_WIFLY
     debugSerial.print(F("Sequence Color @"));
     debugSerial.print(i,DEC);
     debugSerial.print(F(": "));
@@ -458,10 +460,9 @@ void sendIndex()
     sendChunk(F("</div><div id=\"blk"));
     sendChunk(currIdx);sendChunkln(F("\" class=\"cOut\"></div><br/>"));
   }
-
+  sendChunk  (F("<div class=\"cIn\"><input type=\"radio\" name=\"color\" value=\"r\""));if(settings.patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
+  sendChunk  (F("<input required type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width</div><br/>"));
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
-  sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(settings.patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
-  sendChunk  (F("<input required type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
   {
     uint8_t asi = 0;
     char setting_name[8];
@@ -507,7 +508,7 @@ void sendIndex()
   sendChunk  (F("<input required type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(settings.transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
   sendChunk  (F("<input required type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
-  sendChunkln(F("<div class=\"savebuttons\"><h2>Store as named setting?</h2>"));
+  sendChunkln(F("<div class=\"save\"><h1>Save</h1><h2>Store as named setting?</h2>"));
   sendChunk  (F("<input type=\"text\" name=\"name\" id=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no<br/>"));
   for(int i = 0; i < MAX_NUM_USER_SETTINGS; ++i){
@@ -525,7 +526,7 @@ void sendIndex()
     sendChunkln(F("<br/>"));
   }
   sendChunkln(F("<br/>"));
-  sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;width:auto;\"/>"));
+  sendChunkln(F("<input type=\"submit\" value=\"Apply Settings\" style=\"padding:10px;width:auto;\"/>"));
   sendChunkln(F("</div></form></body></html>"));
   sendChunkln();
 
