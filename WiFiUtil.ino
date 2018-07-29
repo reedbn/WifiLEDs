@@ -107,6 +107,9 @@ void processPost()
   debugSerial.println();
   debugSerial.println(wifiBuff);
   #endif
+
+  int setting_to_load = -1;
+  int setting_to_save = -1;
   
   for (int i = 0; i < server.args(); i++) {
     String key = server.argName(i);
@@ -119,21 +122,27 @@ void processPost()
     debugSerial.println(atoi(val));
 
     if(key.compareTo(F("color")) == 0){
-      if(val[0] != 'r')
+      if(val[0] == 'r')
+      {
+        settings.patternType = PTYPE_RAINBOW;
+      }
+      else if(val[0] == 'p')
+      {
+        setting_to_load = atoi(val+1);//+1 to skip the "p" prefix
+      }
+      else
       {
         settings.patternType = PTYPE_SEQ;
         settings.LEDSeqLen = atoi(val)+1;//Number, not max index
       }
-      else
-      {
-        settings.patternType = PTYPE_RAINBOW;
-      }
       
       #if PRINT_DEBUGGING_WIFLY
-      debugSerial.print(F("Processed color (seq,rbw): ("));
+      debugSerial.print(F("Processed color (seq,rbw,load): ("));
       debugSerial.print(settings.LEDSeqLen);
       debugSerial.print(F(","));
       debugSerial.print(settings.patternType);
+      debugSerial.print(F(","));
+      debugSerial.print(setting_to_load);
       debugSerial.println(F(")"));
       #endif
     }
@@ -240,6 +249,37 @@ void processPost()
       debugSerial.println(settings.delayTime);
       #endif
     }
+    else if(key == F("name")){
+      memcpy(settings.name,val,sizeof(settings.name));
+
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed name: "));
+      debugSerial.println(settings.name);
+      #endif
+    }
+    else if(key == F("save_idx")){
+      setting_to_save = atoi(val);
+
+      #if PRINT_DEBUGGING_WIFLY
+      debugSerial.print(F("Processed save_idx: "));
+      debugSerial.println(setting_to_save);
+      #endif
+    }
+  }
+
+  if(0 <= setting_to_load){
+    #if PRINT_DEBUGGING_WIFLY
+    debugSerial.print(F("Loading settings from "));
+    debugSerial.println(setting_to_load);
+    #endif
+    LoadSetting(setting_to_load);
+  }
+  if(0 <= setting_to_save){
+    #if PRINT_DEBUGGING_WIFLY
+    debugSerial.print(F("Saving settings to "));
+    debugSerial.println(setting_to_save);
+    #endif
+    SaveSetting(setting_to_save);
   }
 }
 
@@ -421,13 +461,18 @@ void sendIndex()
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(settings.patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
   sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
-    /*<input type="radio" name="color" value="p0" />Holiday<br/>
-      <input type="radio" name="color" value="p1" />Patriotic<br/>
-      <input type="radio" name="color" value="p2" />Halloween<br/>
-      <input type="radio" name="color" value="p3" />Valentine's<br/>
-      <input type="radio" name="color" value="p4" />Sunset<br/>
-      <input type="radio" name="color" value="p5" />Winter<br/>
-      <input type="radio" name="color" value="p6" />Jungle<br/>*/
+  {
+    uint8_t asi = 0;
+    char setting_name[8];
+    while(available_settings[asi] != 0xFF){
+      uint8_t setting_index = available_settings[asi];
+      sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"p"));sendChunk(available_settings[setting_index]);sendChunk(F("\" />"));
+      GetSettingName(setting_index,setting_name);
+      sendChunk  (setting_name);
+      sendChunkln(F("<br/>"));
+      ++asi;
+    }
+  }
   sendChunkln(F("</div>"));
   
   //Animation styles
@@ -462,7 +507,13 @@ void sendIndex()
   sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
   sendChunkln(F("<div class=\"savebuttons\">"));
-  /*sendChunkln(F("<input type=\"checkbox\" name=\"eeprom\" />Persist on reboot<br/>"));*/
+  sendChunk  (F("Store as named setting? "));
+  sendChunk  (F("<input type=\"text\" name=\"name\" value=\"Preset\" max=\"8\" /> "));
+  sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no "));
+  for(int i = 0; i < MAX_NUM_USER_SETTINGS; ++i){
+    sendChunk(F("<input type=\"radio\" name=\"save_idx\" value=\""));sendChunk(i);sendChunk(F("\" />"));sendChunk(i);sendChunk(F(" "));
+  }
+  sendChunkln(F("<br/>"));
   sendChunkln(F("<input type=\"submit\" value=\"Save Settings\" style=\"padding:10px;width:auto;\"/>"));
   sendChunkln(F("</div></form></body></html>"));
   sendChunkln();
