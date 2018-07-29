@@ -445,7 +445,7 @@ void sendIndex()
     //Iterate over colors (RGB)
     for(int j = 0; j < 3; j++)
     {
-      sendChunk(F("<input type=\"number\" name=\"c"));
+      sendChunk(F("<input required type=\"number\" name=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" id=\"c"));
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" value=\""));
       mask = 0xFF;
@@ -460,7 +460,7 @@ void sendIndex()
 
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
   sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(settings.patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
-  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
+  sendChunk  (F("<input required type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
   {
     uint8_t asi = 0;
     char setting_name[8];
@@ -480,9 +480,9 @@ void sendIndex()
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a0\""));if(settings.animMode==ANIM_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
   sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(settings.animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(settings.animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake "));
-  sendChunk  (F("<input type=\"number\" name=\"snakeLen\" value=\""));sendChunk(settings.snakeLen);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" /> long<br/>"));
+  sendChunk  (F("<input required type=\"number\" name=\"snakeLen\" value=\""));sendChunk(settings.snakeLen);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" /> long<br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(settings.animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
-  sendChunk  (F("<input type=\"number\" name=\"twinklePer\" value=\""));sendChunk(settings.twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
+  sendChunk  (F("<input required type=\"number\" name=\"twinklePer\" value=\""));sendChunk(settings.twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
   
   sendChunkln(F("<div class=\"atype\"><h2>Type</h2>"));
   sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e0\""));if(settings.patternMode==PATTERN_SERIAL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Serial<br/>"));
@@ -503,11 +503,11 @@ void sendIndex()
   sendChunkln(F("</div>"));
   
   sendChunkln(F("<div class=\"atime\"><h2>Timing</h2>"));
-  sendChunk  (F("<input type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(settings.transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
-  sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
+  sendChunk  (F("<input required type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(settings.transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
+  sendChunk  (F("<input required type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
   sendChunkln(F("<div class=\"savebuttons\"><h2>Store as named setting?</h2>"));
-  sendChunk  (F("<input type=\"text\" name=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
+  sendChunk  (F("<input required type=\"text\" name=\"name\" placeholder=\"Name Me\" pattern=\".{1,7}\" title=\"1-7 characters\" style=\"width:7em;\"/><br/>"));
   sendChunk  (F("<input type=\"radio\" name=\"save_idx\" value=\"-1\" checked=\"checked\" />no<br/>"));
   for(int i = 0; i < MAX_NUM_USER_SETTINGS; ++i){
     sendChunk(F("<input type=\"radio\" name=\"save_idx\" value=\""));sendChunk(i);sendChunk(F("\" />"));sendChunk(i);sendChunk(F(" "));
