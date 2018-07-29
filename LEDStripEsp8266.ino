@@ -14,11 +14,14 @@ void setup()
 {
   //Start the serial
   Serial.begin(74880);
+
+  //Set up EEPROM
+  InitEeprom();
   
   //Set up WiFi
   wifiSetup();
 
-  //Setup strip
+  //Set up strip
   stripSetup();
 
   stripTicker.attach(1.0/STRIP_MAX_REFRESH_HZ,allowStripLoop);
