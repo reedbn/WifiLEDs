@@ -43,7 +43,7 @@ extern uint8_t available_settings[MAX_NUM_USER_SETTINGS+1];//+1 in case all of t
 void InitEeprom();
 
 //Note: name_out must be able to hold at least 8 characters
-void GetName(uint8_t setting_index, char* name_out);
+void GetSettingName(uint8_t setting_index, char* name_out);
 
 void LoadSetting(uint8_t setting_index);
 

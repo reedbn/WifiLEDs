@@ -27,7 +27,7 @@ void InitEeprom()
 }
 
 //Note: name_out must be able to hold at least 8 characters
-void GetName(uint8_t setting_index, char* name_out)
+void GetSettingName(uint8_t setting_index, char* name_out)
 {
   uint16_t eeprom_offset = sizeof(settings_t)*setting_index;
   for(uint32_t i = 0; i < 8; ++i){
