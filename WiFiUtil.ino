@@ -1,6 +1,9 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
+#include "config.h"
+#include "settings.h"
+
 #define debugSerial Serial
 
 //353 characters would be 3 digit values for every color value,
@@ -118,19 +121,19 @@ void processPost()
     if(key.compareTo(F("color")) == 0){
       if(val[0] != 'r')
       {
-        patternType = PTYPE_SEQ;
-        LEDSeqLen = atoi(val)+1;//Number, not max index
+        settings.patternType = PTYPE_SEQ;
+        settings.LEDSeqLen = atoi(val)+1;//Number, not max index
       }
       else
       {
-        patternType = PTYPE_RAINBOW;
+        settings.patternType = PTYPE_RAINBOW;
       }
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed color (seq,rbw): ("));
-      debugSerial.print(LEDSeqLen);
+      debugSerial.print(settings.LEDSeqLen);
       debugSerial.print(F(","));
-      debugSerial.print(patternType);
+      debugSerial.print(settings.patternType);
       debugSerial.println(F(")"));
       #endif
     }
@@ -138,16 +141,16 @@ void processPost()
       int cidx = atoi(key.c_str()+1);//skip the 'c' when doing atoi
       switch(key.charAt(key.length()-1)){
         case 'r':
-          LEDSeq[cidx] &= ~(strip.Color(255,0,0));
-          LEDSeq[cidx] |= strip.Color(atoi(val),0,0);
+          settings.LEDSeq[cidx] &= ~(strip.Color(255,0,0));
+          settings.LEDSeq[cidx] |= strip.Color(atoi(val),0,0);
           break;
         case 'g':
-          LEDSeq[cidx] &= ~(strip.Color(0,255,0));
-          LEDSeq[cidx] |= strip.Color(0,atoi(val),0);
+          settings.LEDSeq[cidx] &= ~(strip.Color(0,255,0));
+          settings.LEDSeq[cidx] |= strip.Color(0,atoi(val),0);
           break;
         case 'b':
-          LEDSeq[cidx] &= ~(strip.Color(0,0,255));
-          LEDSeq[cidx] |= strip.Color(0,0,atoi(val));
+          settings.LEDSeq[cidx] &= ~(strip.Color(0,0,255));
+          settings.LEDSeq[cidx] |= strip.Color(0,0,atoi(val));
           break;
         default:
           debugSerial.print("Unknown color in key \"");
@@ -162,79 +165,79 @@ void processPost()
       debugSerial.print(F("cidx "));
       debugSerial.print(cidx);
       debugSerial.print(F(" and is now colored "));
-      debugSerial.println(LEDSeq[cidx]);
+      debugSerial.println(settings.LEDSeq[cidx]);
       #endif
     }
     else if(key.compareTo(F("rbw")) == 0){
-      rainbowWidth = atoi(val);
+      settings.rainbowWidth = atoi(val);
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed rbw: "));
-      debugSerial.println(rainbowWidth);
+      debugSerial.println(settings.rainbowWidth);
       #endif
     }
     else if(key.compareTo(F("anim")) == 0){
-      animMode = atoi(val+1);//prepended with 'a'
+      settings.animMode = atoi(val+1);//prepended with 'a'
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed a: "));
-      debugSerial.println(animMode);
+      debugSerial.println(settings.animMode);
       #endif
     }
     else if(key.compareTo(F("snakeLen")) == 0){
-      snakeLen = atoi(val);
+      settings.snakeLen = atoi(val);
 
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed snakeLen: "));
-      debugSerial.println(snakeLen);
+      debugSerial.println(settings.snakeLen);
       #endif
     }
     else if(key.compareTo(F("twinklePer")) == 0){
-      twinkleThresh = atoi(val);
+      settings.twinkleThresh = atoi(val);
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed twinklePer: "));
-      debugSerial.println(twinkleThresh);
+      debugSerial.println(settings.twinkleThresh);
       #endif
     }
     else if(key.compareTo(F("tran")) == 0){
-      transMode = atoi(val+1);//prepended with 't'
+      settings.transMode = atoi(val+1);//prepended with 't'
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed tran: "));
-      debugSerial.println(transMode);
+      debugSerial.println(settings.transMode);
       #endif
     }
     else if(key.compareTo(F("transT")) == 0){
-      transTime = atoi(val);
+      settings.transTime = atoi(val);
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed transT: "));
-      debugSerial.println(transTime);
+      debugSerial.println(settings.transTime);
       #endif
     }
     else if(key.compareTo(F("patt")) == 0){
-      patternMode = atoi(val+1);//prepended with 'e'
+      settings.patternMode = atoi(val+1);//prepended with 'e'
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed patt: "));
-      debugSerial.println(patternMode);
+      debugSerial.println(settings.patternMode);
       #endif
     }
     else if(key.compareTo(F("dir")) == 0){
-      dirMode = atoi(val+1);//prepended with 'd'
+      settings.dirMode = atoi(val+1);//prepended with 'd'
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed dir: "));
-      debugSerial.println(dirMode);
+      debugSerial.println(settings.dirMode);
       #endif
     }
     else if(key == F("delayT")){
-      delayTime = atoi(val);
+      settings.delayTime = atoi(val);
       
       #if PRINT_DEBUGGING_WIFLY
       debugSerial.print(F("Processed delayT: "));
-      debugSerial.println(delayTime);
+      debugSerial.println(settings.delayTime);
       #endif
     }
   }
@@ -387,7 +390,7 @@ void sendIndex()
     sendChunkln(F("<div class=\"cIn\">"));
     sendChunk(F("<input type=\"radio\" name=\"color\" value=\""));
     sendChunk(currIdx);
-    if((patternType == PTYPE_SEQ) && (i == LEDSeqLen-1))
+    if((settings.patternType == PTYPE_SEQ) && (i == settings.LEDSeqLen-1))
       sendChunkln(F("\" checked=\"checked\" />"));
     else
       sendChunkln(F("\" />"));
@@ -407,7 +410,7 @@ void sendIndex()
       sendChunk(currIdx);sendChunk(cnames[j]);sendChunk(F("\" value=\""));
       mask = 0xFF;
       mask = mask<<shifts[j];
-      sendChunk(itoa((LEDSeq[i]&mask)>>shifts[j],wifiBuff+6,10));
+      sendChunk(itoa((settings.LEDSeq[i]&mask)>>shifts[j],wifiBuff+6,10));
       sendChunk(F("\" min=\"0\" max=\"255\" step=\"1\" onblur=\"updateColor("));
       sendChunk(currIdx);sendChunkln(F(")\"/>"));
     }
@@ -416,8 +419,8 @@ void sendIndex()
   }
 
   sendChunkln(F("</div><div class=\"cpre\"><h2>Presets</h2>"));
-  sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
-  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
+  sendChunk  (F("<input type=\"radio\" name=\"color\" value=\"r\""));if(settings.patternType==PTYPE_RAINBOW){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Rainbow "));
+  sendChunk  (F("<input type=\"number\" name=\"rbw\" value=\""));sendChunk(settings.rainbowWidth);sendChunk(F("\" min=\"1\" max=\""));sendChunk(768);sendChunkln(F("\" step=\"1\" />Width<br/>"));
     /*<input type="radio" name="color" value="p0" />Holiday<br/>
       <input type="radio" name="color" value="p1" />Patriotic<br/>
       <input type="radio" name="color" value="p2" />Halloween<br/>
@@ -429,34 +432,34 @@ void sendIndex()
   
   //Animation styles
   sendChunkln(F("<h1 class=\"ahead\">Animation</h1><div class=\"astyle\"><h2>Style</h2>"));
-  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a0\""));if(animMode==ANIM_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
-  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake "));
-  sendChunk  (F("<input type=\"number\" name=\"snakeLen\" value=\""));sendChunk(snakeLen);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" /> long<br/>"));
-  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
-  sendChunk  (F("<input type=\"number\" name=\"twinklePer\" value=\""));sendChunk(twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
+  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a0\""));if(settings.animMode==ANIM_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"anim\" value=\"a1\""));if(settings.animMode==ANIM_SCROLL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Scroll<br/>"));
+  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a2\""));if(settings.animMode==ANIM_SNAKE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Snake "));
+  sendChunk  (F("<input type=\"number\" name=\"snakeLen\" value=\""));sendChunk(settings.snakeLen);sendChunk(F("\" min=\"1\" max=\""));sendChunk(numLEDs);sendChunkln(F("\" step=\"1\" /> long<br/>"));
+  sendChunk  (F("<input type=\"radio\" name=\"anim\" value=\"a3\""));if(settings.animMode==ANIM_TWINKLE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Twinkle "));
+  sendChunk  (F("<input type=\"number\" name=\"twinklePer\" value=\""));sendChunk(settings.twinkleThresh);sendChunkln(F("\" min=\"0\" max=\"100\" step=\"1\" />% on<br/></div>"));
   
   sendChunkln(F("<div class=\"atype\"><h2>Type</h2>"));
-  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e0\""));if(patternMode==PATTERN_SERIAL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Serial<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e1\""));if(patternMode==PATTERN_BLOCKS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Blocks<br/>"));      
-  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e2\""));if(patternMode==PATTERN_SOLIDS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Solids<br/></div>"));
+  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e0\""));if(settings.patternMode==PATTERN_SERIAL){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Serial<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e1\""));if(settings.patternMode==PATTERN_BLOCKS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Blocks<br/>"));      
+  sendChunkln(F("<input type=\"radio\" name=\"patt\" value=\"e2\""));if(settings.patternMode==PATTERN_SOLIDS){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Solids<br/></div>"));
   
   sendChunkln(F("<div class=\"atrans\"><h2>Transition</h2>"));
-  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t0\""));if(transMode==TRANS_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t1\""));if(transMode==TRANS_PULSE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Pulse<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t2\""));if(transMode==TRANS_FLASH){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Flash<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t3\""));if(transMode==TRANS_FADE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Fade<br/></div>"));
+  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t0\""));if(settings.transMode==TRANS_NONE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />None<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t1\""));if(settings.transMode==TRANS_PULSE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Pulse<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t2\""));if(settings.transMode==TRANS_FLASH){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Flash<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"tran\" value=\"t3\""));if(settings.transMode==TRANS_FADE){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Fade<br/></div>"));
   
   sendChunkln(F("<div class=\"adir\"><h2>Direction</h2>"));
-  sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d0\""));if(dirMode==DIR_L){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Left<br/>"));
-  sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d1\""));if(dirMode==DIR_R){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Right<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d0\""));if(settings.dirMode==DIR_L){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Left<br/>"));
+  sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d1\""));if(settings.dirMode==DIR_R){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Right<br/>"));
   /*sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d2\""));if(animMode==DIR_OUT){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />Out<br/>"));
     sendChunkln(F("<input type=\"radio\" name=\"dir\" value=\"d3\""));if(animMode==DIR_IN){sendChunk(F(" checked=\"checked\" "));};sendChunkln(F(" />In<br/>"))*/
   sendChunkln(F("</div>"));
   
   sendChunkln(F("<div class=\"atime\"><h2>Timing</h2>"));
-  sendChunk  (F("<input type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
-  sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
+  sendChunk  (F("<input type=\"number\" name=\"transT\" style=\"width:5em;\" value=\""));sendChunk(settings.transTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Transition (ms)<br/>"));
+  sendChunk  (F("<input type=\"number\" name=\"delayT\" style=\"width:5em;\" value=\""));sendChunk(settings.delayTime);sendChunkln(F("\" min=\"0\" step=\"1\" /> Delay (ms)<br/></div>"));
   sendChunkln(F("</div>"));
   sendChunkln(F("<div class=\"savebuttons\">"));
   /*sendChunkln(F("<input type=\"checkbox\" name=\"eeprom\" />Persist on reboot<br/>"));*/

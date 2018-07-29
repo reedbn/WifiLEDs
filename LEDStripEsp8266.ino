@@ -1,22 +1,7 @@
-#include <Adafruit_NeoPixel.h>
-#include <ESP8266WiFi.h>
-#include <IIRFilter.h>
-#include <pgmspace.h>
 #include <Ticker.h>
 
-//Initialization/hardware config
-#define LEDdataPin           2
-#define numLEDs             20
-#define maxSeqLen           11
-
-const char* ssid = "RFish";
-const char* pass = "NotUrFish";
-const IPAddress apIP(192,168,4,1);
-#define STRIP_MAX_REFRESH_HZ 60
-
-#define PRINT_DEBUGGING_LED (0)
-#define PRINT_DEBUGGING_WIFLY (0)
-#define PRINT_DEBUGGING_WIFLY_DETAIL (0)
+#include "config.h"
+#include "settings.h"
 
 Ticker stripTicker;
 bool stripLoopAllowed = false;
@@ -24,8 +9,6 @@ void allowStripLoop()
 {
   stripLoopAllowed = true;
 }
-
-extern volatile bool stripParamsUpdated;
 
 void setup()
 {

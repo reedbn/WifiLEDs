@@ -1,4 +1,8 @@
 #include <Adafruit_NeoPixel.h>
+#include <IIRFilter.h>
+
+#include "config.h"
+#include "settings.h"
 
 #define debugSerial Serial
 
@@ -6,30 +10,8 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLEDs, LEDdataPin, NEO_GRB + NEO_KHZ800);
 
 //Create some arrays to store desired colors
-uint32_t LEDSeq [maxSeqLen];
 uint32_t LEDNow [numLEDs];
 uint32_t LEDNext [numLEDs];
-
-//Create some enumerations of display options
-enum {PTYPE_SEQ, PTYPE_RAINBOW};
-enum {PATTERN_SERIAL, PATTERN_BLOCKS, PATTERN_SOLIDS};
-enum {ANIM_NONE, ANIM_SCROLL, ANIM_SNAKE, ANIM_TWINKLE};
-enum {DIR_L, DIR_R, DIR_OUT, DIR_IN};
-enum {TRANS_NONE, TRANS_PULSE, TRANS_FLASH, TRANS_FADE};
-
-//Set default display options
-int LEDSeqLen = 1;
-byte patternType = PTYPE_SEQ;
-int patternLen = 1;//Dynamically set to either LEDSeqLen or rainbowWidth
-int snakeLen = 1;
-byte patternMode = PATTERN_SERIAL;
-byte animMode = ANIM_SNAKE;
-byte dirMode = DIR_R;
-byte transMode = TRANS_FADE;
-int delayTime = 0;//ms
-int transTime = 500;//ms
-int rainbowWidth = numLEDs;//number of LEDs wide
-byte twinkleThresh = 20;//percent of LEDs to turn on
 
 //Create a storage location for all display functions to use
 unsigned int frameNum = 0;
@@ -44,19 +26,30 @@ void stripSetup()
   
   //Initialize the LED sequence to be displayed
   int i = 0;
-  LEDSeq[i++] = strip.Color(  0,  0,  0);//black
-  LEDSeq[i++] = strip.Color( 5, 5, 5);
-  LEDSeq[i++] = strip.Color( 10, 10, 10);
-  LEDSeq[i++] = strip.Color(127,127,127);
-  LEDSeq[i++] = strip.Color(255,255,255);//white
-  LEDSeq[i++] = strip.Color(255,  0,  0);//red
-  LEDSeq[i++] = strip.Color(255,255,  0);//yellow
-  LEDSeq[i++] = strip.Color(  0,255,  0);//green
-  LEDSeq[i++] = strip.Color(  0,255,255);//teal
-  LEDSeq[i++] = strip.Color(  0,  0,255);//blue
-  LEDSeq[i++] = strip.Color(255,  0,255);//purple
-  LEDSeqLen = i;
-  snakeLen = LEDSeqLen;
+  settings.LEDSeq[i++] = strip.Color(  0,  0,  0);//black
+  settings.LEDSeq[i++] = strip.Color( 5, 5, 5);
+  settings.LEDSeq[i++] = strip.Color( 10, 10, 10);
+  settings.LEDSeq[i++] = strip.Color(127,127,127);
+  settings.LEDSeq[i++] = strip.Color(255,255,255);//white
+  settings.LEDSeq[i++] = strip.Color(255,  0,  0);//red
+  settings.LEDSeq[i++] = strip.Color(255,255,  0);//yellow
+  settings.LEDSeq[i++] = strip.Color(  0,255,  0);//green
+  settings.LEDSeq[i++] = strip.Color(  0,255,255);//teal
+  settings.LEDSeq[i++] = strip.Color(  0,  0,255);//blue
+  settings.LEDSeq[i++] = strip.Color(255,  0,255);//purple
+  settings.LEDSeqLen = i;
+  settings.snakeLen = settings.LEDSeqLen;
+  memcpy(settings.name,"Default",sizeof(settings.name));
+  settings.patternType = PTYPE_SEQ;
+  settings.patternLen = 1;//This will automatically be updated
+  settings.patternMode = PATTERN_SERIAL;
+  settings.animMode = ANIM_SNAKE;
+  settings.dirMode = DIR_R;
+  settings.transMode = TRANS_FADE;
+  settings.delayTime = 0;
+  settings.transTime = 500;
+  settings.rainbowWidth = numLEDs;
+  settings.twinkleThresh = 20;
   
   #if PRINT_DEBUGGING_LED
   debugSerial.println(F("LED Strip Setup Complete"));
@@ -72,29 +65,29 @@ void stripLoop()
   #if PRINT_DEBUGGING_LED
   debugSerial.println(F("Starting Loop"));
   debugSerial.print(F("Currently on frame "));  debugSerial.println(frameNum);
-  debugSerial.print(F("patternType: "));        debugSerial.println(patternType);
-  debugSerial.print(F("patternMode: "));        debugSerial.println(patternMode);
-  debugSerial.print(F("animMode:    "));        debugSerial.println(animMode);
-  debugSerial.print(F("dirMode:     "));        debugSerial.println(dirMode);
-  debugSerial.print(F("transMode:   "));        debugSerial.println(transMode);
+  debugSerial.print(F("patternType: "));        debugSerial.println(settings.patternType);
+  debugSerial.print(F("patternMode: "));        debugSerial.println(settings.patternMode);
+  debugSerial.print(F("animMode:    "));        debugSerial.println(settings.animMode);
+  debugSerial.print(F("dirMode:     "));        debugSerial.println(settings.dirMode);
+  debugSerial.print(F("transMode:   "));        debugSerial.println(settings.transMode);
   debugSerial.println(F("Filling LEDNext..."));
   #endif
 
-  switch(patternType)
+  switch(settings.patternType)
   {
     case PTYPE_SEQ:
-      patternLen = LEDSeqLen;
+      settings.patternLen = settings.LEDSeqLen;
       break;
     case PTYPE_RAINBOW:
-      patternLen = rainbowWidth;
+      settings.patternLen = settings.rainbowWidth;
       break;
     default:
-      patternLen = 1;//If zero, we run into loop problems
+      settings.patternLen = 1;//If zero, we run into loop problems
       break;
   }
   
   //Load the buffer with the next frame as appropriate
-  switch(animMode)
+  switch(settings.animMode)
   {
   case ANIM_NONE:
     None();
@@ -135,7 +128,7 @@ void stripLoop()
   debugSerial.println(F("Delaying..."));
   #endif
   //Stay on this pattern for a time
-  delay(delayTime);
+  delay(settings.delayTime);
 }
 
 void Transition()
@@ -148,7 +141,7 @@ void Transition()
   
   //takes roughly 24ms to set all pixels in a 5m strand
   //+2 to ensure we at least do the update
-  unsigned int numStepsInTrans = (transTime/1000.0*timeScaler.getVal()) + 2;
+  unsigned int numStepsInTrans = (settings.transTime/1000.0*timeScaler.getVal()) + 2;
   #if PRINT_DEBUGGING_LED
   debugSerial.print(F("Generating "));
   debugSerial.print(numStepsInTrans);
@@ -160,7 +153,7 @@ void Transition()
     LEDNow[i] = strip.getPixelColor(i);
   }
   
-  switch(transMode)
+  switch(settings.transMode)
   {
     case TRANS_NONE:
     default:
@@ -181,7 +174,7 @@ void Transition()
       }
       
       strip.show();
-      delay(transTime);
+      delay(settings.transTime);
       break;
     }
     
@@ -264,11 +257,11 @@ void Transition()
   }
   
   start = millis()-start;
-  timeScaler.update((transTime*1.0/start)*timeScaler.getVal());
+  timeScaler.update((settings.transTime*1.0/start)*timeScaler.getVal());
 
   #if PRINT_DEBUGGING_LED
   debugSerial.print(F("Timing desired/actual/factor:\t"));
-  debugSerial.print(transTime);
+  debugSerial.print(settings.transTime);
   debugSerial.print(F("\t"));
   debugSerial.print(start);
   debugSerial.print(F("\t"));
@@ -299,18 +292,18 @@ void None()
   debugSerial.println(F("Updating with None()"));
   #endif
   
-  if(patternMode == PATTERN_SERIAL)
+  if(settings.patternMode == PATTERN_SERIAL)
   {
     for(int i=0; i<numLEDs; /*Update done in for loop*/)
     {
-      for(int j=0; j<patternLen; j++)
+      for(int j=0; j<settings.patternLen; j++)
       {
         if(i+j < numLEDs)
         {
-          if(patternType == PTYPE_SEQ){
-            LEDNext[i+j] = LEDSeq[j];
+          if(settings.patternType == PTYPE_SEQ){
+            LEDNext[i+j] = settings.LEDSeq[j];
           }
-          else if(patternType == PTYPE_RAINBOW){
+          else if(settings.patternType == PTYPE_RAINBOW){
             LEDNext[i+j] = RainbowSeq(j);
           }
           else{
@@ -329,14 +322,14 @@ void None()
           return;
         }
       }
-      i+=patternLen;
+      i += settings.patternLen;
     }
   }
-  else if(patternMode == PATTERN_BLOCKS)
+  else if(settings.patternMode == PATTERN_BLOCKS)
   {
-    int block_width = numLEDs/patternLen;
+    int block_width = numLEDs/settings.patternLen;
     int extra_pixels = numLEDs % block_width;
-    for(int i=0; i<patternLen; i++)
+    for(int i=0; i<settings.patternLen; i++)
     {
       //Give extra/uneven pixels to the first chunks
       int bonus = 0;
@@ -345,10 +338,10 @@ void None()
       }
       for(int j=0; j<block_width; j++)
       {
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i*block_width + j] = LEDSeq[i];
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i*block_width + j] = settings.LEDSeq[i];
         }
-        else if(patternType == PTYPE_RAINBOW){
+        else if(settings.patternType == PTYPE_RAINBOW){
           LEDNext[i*block_width + j] = RainbowSeq(i);
         }
         else{
@@ -364,15 +357,15 @@ void None()
       }
     }
   }
-  else if(patternMode == PATTERN_SOLIDS)
+  else if(settings.patternMode == PATTERN_SOLIDS)
   {
     //We're not supposed to animate, so just go with the first color everywhere
     for(int i=0; i<numLEDs; i++)
     {
-      if(patternType == PTYPE_SEQ){
-        LEDNext[i] = LEDSeq[0];
+      if(settings.patternType == PTYPE_SEQ){
+        LEDNext[i] = settings.LEDSeq[0];
       }
-      else if(patternType == PTYPE_RAINBOW){
+      else if(settings.patternType == PTYPE_RAINBOW){
         LEDNext[i] = RainbowSeq(0);
       }
       else{
@@ -395,18 +388,18 @@ void Scroll()
   debugSerial.println(F("Updating with Scroll()"));
   #endif
   int dir_fact = 1;
-  if(dirMode == DIR_R){
+  if(settings.dirMode == DIR_R){
     dir_fact = -1;
   }
 
   int offset = frameNum*dir_fact;
   while(offset < 0)
   {
-    offset += patternLen;
+    offset += settings.patternLen;
   }
-  while(offset >= patternLen)
+  while(offset >= settings.patternLen)
   {
-    offset -= patternLen;
+    offset -= settings.patternLen;
   }
 
   int head_pixel = frameNum*dir_fact;
@@ -417,17 +410,17 @@ void Scroll()
     head_pixel -= numLEDs;
   }
     
-  if(patternMode == PATTERN_SERIAL)
+  if(settings.patternMode == PATTERN_SERIAL)
   {
-    if(dirMode == DIR_L || dirMode == DIR_R)
+    if(settings.dirMode == DIR_L || settings.dirMode == DIR_R)
     {
       for(int i=0; i<numLEDs; i++)
       {
-        int pattern_index = (offset + i)%patternLen;
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i] = LEDSeq[pattern_index];
+        int pattern_index = (offset + i)%settings.patternLen;
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i] = settings.LEDSeq[pattern_index];
         }
-        else if(patternType == PTYPE_RAINBOW){
+        else if(settings.patternType == PTYPE_RAINBOW){
           LEDNext[i] = RainbowSeq(pattern_index);
         }
         else{
@@ -443,9 +436,9 @@ void Scroll()
       }
     }
   }
-  else if(patternMode == PATTERN_BLOCKS)
+  else if(settings.patternMode == PATTERN_BLOCKS)
   {
-    if(dirMode == DIR_L || dirMode == DIR_R)
+    if(settings.dirMode == DIR_L || settings.dirMode == DIR_R)
     {
       for(int i=0; i<numLEDs; i++)
       {
@@ -453,19 +446,19 @@ void Scroll()
         if(index_offset >= numLEDs){
           index_offset -= numLEDs;
         }
-        int pattern_index = index_offset*patternLen/numLEDs;
-        if(patternLen > numLEDs)
+        int pattern_index = index_offset*settings.patternLen/numLEDs;
+        if(settings.patternLen > numLEDs)
         {
           pattern_index = (offset+i);
         }
-        if(pattern_index >= patternLen)
+        if(pattern_index >= settings.patternLen)
         {
-          pattern_index -= patternLen;
+          pattern_index -= settings.patternLen;
         }
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i] = LEDSeq[pattern_index];
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i] = settings.LEDSeq[pattern_index];
         }
-        else if(patternType == PTYPE_RAINBOW){
+        else if(settings.patternType == PTYPE_RAINBOW){
           LEDNext[i] = RainbowSeq(pattern_index);
         }
         else{
@@ -482,18 +475,18 @@ void Scroll()
     }
   }
     
-  else if(patternMode == PATTERN_SOLIDS)
+  else if(settings.patternMode == PATTERN_SOLIDS)
   {
     for(int i=0; i<numLEDs; i++)
     {
       int seq_idx = 0;
-      if(dirMode == DIR_L || dirMode == DIR_R)
-        seq_idx = frameNum*-1*dir_fact % patternLen;
+      if(settings.dirMode == DIR_L || settings.dirMode == DIR_R)
+        seq_idx = frameNum*-1*dir_fact % settings.patternLen;
 
-      if(patternType == PTYPE_SEQ){
-        LEDNext[i] = LEDSeq[seq_idx];
+      if(settings.patternType == PTYPE_SEQ){
+        LEDNext[i] = settings.LEDSeq[seq_idx];
       }
-      else if(patternType == PTYPE_RAINBOW){
+      else if(settings.patternType == PTYPE_RAINBOW){
         LEDNext[i] = RainbowSeq(seq_idx);
       }
       else{
@@ -518,22 +511,22 @@ void Snake()
   debugSerial.println(F("Updating with Snake()"));
   #endif
   short dir_fact = -1;
-  if(dirMode == DIR_R)
+  if(settings.dirMode == DIR_R)
     dir_fact = 1;
   long offset = frameNum*dir_fact;
   while(offset < 0)
   {
-    offset += patternLen;
+    offset += settings.patternLen;
   }
-  while(offset >= patternLen)
+  while(offset >= settings.patternLen)
   {
-    offset -= patternLen;
+    offset -= settings.patternLen;
   }
 
   long trailing_pixel = frameNum*dir_fact - dir_fact;
-  if(dirMode == DIR_L)
+  if(settings.dirMode == DIR_L)
   {
-    trailing_pixel = trailing_pixel + snakeLen - 1;
+    trailing_pixel = trailing_pixel + settings.snakeLen - 1;
   }
   while(trailing_pixel < 0)
   {
@@ -551,46 +544,46 @@ void Snake()
   
   LEDNext[trailing_pixel] = 0;
   
-  for(int i=0; i < snakeLen; i++)
+  for(int i=0; i < settings.snakeLen; i++)
   {
     uint16_t dest_idx = trailing_pixel + 1 + i;
     while(dest_idx >= numLEDs)
     {
       dest_idx = dest_idx - numLEDs;
     }
-    if(patternMode == PATTERN_SERIAL)
+    if(settings.patternMode == PATTERN_SERIAL)
     {
-      int pattern_index = i % patternLen;
-      if(patternType == PTYPE_SEQ){
-        LEDNext[dest_idx] = LEDSeq[pattern_index];
+      int pattern_index = i % settings.patternLen;
+      if(settings.patternType == PTYPE_SEQ){
+        LEDNext[dest_idx] = settings.LEDSeq[pattern_index];
       }
-      else if(patternType == PTYPE_RAINBOW){
+      else if(settings.patternType == PTYPE_RAINBOW){
         LEDNext[dest_idx] = RainbowSeq(pattern_index);
       }
       else{
         //Do something?
       }
     }
-    else if(patternMode == PATTERN_BLOCKS)
+    else if(settings.patternMode == PATTERN_BLOCKS)
     {
-      int pattern_index = patternLen*dest_idx/numLEDs;
-      if(patternType == PTYPE_SEQ){
-        LEDNext[dest_idx] = LEDSeq[pattern_index];
+      int pattern_index = settings.patternLen*dest_idx/numLEDs;
+      if(settings.patternType == PTYPE_SEQ){
+        LEDNext[dest_idx] = settings.LEDSeq[pattern_index];
       }
-      else if(patternType == PTYPE_RAINBOW){
+      else if(settings.patternType == PTYPE_RAINBOW){
         LEDNext[dest_idx] = RainbowSeq(pattern_index);
       }
       else{
         //Do something?
       }
     }
-    else if(patternMode == PATTERN_SOLIDS)
+    else if(settings.patternMode == PATTERN_SOLIDS)
     {
-      int pattern_index = frameNum % patternLen;
-      if(patternType == PTYPE_SEQ){
-        LEDNext[dest_idx] = LEDSeq[pattern_index];
+      int pattern_index = frameNum % settings.patternLen;
+      if(settings.patternType == PTYPE_SEQ){
+        LEDNext[dest_idx] = settings.LEDSeq[pattern_index];
       }
-      else if(patternType == PTYPE_RAINBOW){
+      else if(settings.patternType == PTYPE_RAINBOW){
         LEDNext[dest_idx] = RainbowSeq(pattern_index);
       }
       else{
@@ -615,17 +608,17 @@ void Twinkle()
   #endif
   clearLEDNext();
   
-  if(patternMode == PATTERN_SERIAL)
+  if(settings.patternMode == PATTERN_SERIAL)
   {
     for(uint16_t i=0; i<numLEDs; i++)
     {
-      if(random(100) < twinkleThresh)
+      if(random(100) < settings.twinkleThresh)
       {
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i] = LEDSeq[random(patternLen)];
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i] = settings.LEDSeq[random(settings.patternLen)];
         }
-        else if(patternType == PTYPE_RAINBOW){
-          LEDNext[i] = RainbowSeq(random(patternLen));
+        else if(settings.patternType == PTYPE_RAINBOW){
+          LEDNext[i] = RainbowSeq(random(settings.patternLen));
         }
         else{
           //Do something?
@@ -640,17 +633,17 @@ void Twinkle()
       }
     }
   }
-  else if(patternMode == PATTERN_SOLIDS)
+  else if(settings.patternMode == PATTERN_SOLIDS)
   {
-    int pattern_index = random(patternLen);
+    int pattern_index = random(settings.patternLen);
     for(uint16_t i=0; i<numLEDs; i++)
     {
-      if(random(100) < twinkleThresh)
+      if(random(100) < settings.twinkleThresh)
       {
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i] = LEDSeq[pattern_index];
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i] = settings.LEDSeq[pattern_index];
         }
-        else if(patternType == PTYPE_RAINBOW){
+        else if(settings.patternType == PTYPE_RAINBOW){
           LEDNext[i] = RainbowSeq(pattern_index);
         }
         else{
@@ -666,28 +659,28 @@ void Twinkle()
       }
     }
   }
-  else if(patternMode == PATTERN_BLOCKS)
+  else if(settings.patternMode == PATTERN_BLOCKS)
   {
-    int num_blocks = patternLen;
-    if(patternLen > numLEDs){
+    int num_blocks = settings.patternLen;
+    if(settings.patternLen > numLEDs){
       num_blocks = numLEDs;
     }
     
     int color_idx[num_blocks];
     for(int i=0; i<num_blocks; i++)
     {
-      color_idx[i] = random(patternLen);
+      color_idx[i] = random(settings.patternLen);
     }
     
     for(int i=0; i<numLEDs; i++)
     {
-      if(random(100) < twinkleThresh)
+      if(random(100) < settings.twinkleThresh)
       {
         int pattern_index = color_idx[num_blocks*i/numLEDs];
-        if(patternType == PTYPE_SEQ){
-          LEDNext[i] = LEDSeq[pattern_index];
+        if(settings.patternType == PTYPE_SEQ){
+          LEDNext[i] = settings.LEDSeq[pattern_index];
         }
-        else if(patternType == PTYPE_RAINBOW){
+        else if(settings.patternType == PTYPE_RAINBOW){
           LEDNext[i] = RainbowSeq(pattern_index);
         }
         else{
@@ -763,16 +756,16 @@ static const unsigned int WHEEL_PRECISION = 256;
 uint32_t RainbowSeq(unsigned int i)
 {
   int dir_fact = 1;
-  if(dirMode == DIR_R)
+  if(settings.dirMode == DIR_R)
     dir_fact = -1;
   
-  float scaleFactor = WHEEL_PRECISION*3.0/rainbowWidth;
+  float scaleFactor = WHEEL_PRECISION*3.0/settings.rainbowWidth;
 
   int tmp_idx = i*dir_fact;
   while(tmp_idx < 0)
-    tmp_idx += rainbowWidth;
-  while(tmp_idx >= rainbowWidth)
-    tmp_idx -= rainbowWidth;
+    tmp_idx += settings.rainbowWidth;
+  while(tmp_idx >= settings.rainbowWidth)
+    tmp_idx -= settings.rainbowWidth;
   int tmpColor = ((int)(tmp_idx * scaleFactor)) % (3*WHEEL_PRECISION);
   return Wheel(tmpColor);
 }
