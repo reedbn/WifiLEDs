@@ -44,7 +44,7 @@ void wifiSetup()
   #if PRINT_DEBUGGING_WIFLY
   debugSerial.println(
   #endif
-  WiFi.softAP(ssid,pass)
+  WiFi.softAP(ssid,pass,wifi_channel,false)
   #if PRINT_DEBUGGING_WIFLY
   ? F("SoftAP ready") : F("SoftAP failed"))
   #endif

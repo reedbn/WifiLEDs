@@ -15,6 +15,8 @@ void setup()
   //Start the serial
   Serial.begin(74880);
 
+  delay(500);
+
   //Set up EEPROM
   InitEeprom();
   

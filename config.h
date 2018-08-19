@@ -19,6 +19,7 @@ const uint32_t STRIP_MAX_REFRESH_HZ = 60;
 
 static const char* ssid = "RFish";
 static const char* pass = "NotUrFish";
+static const unsigned int wifi_channel = 1;
 const IPAddress apIP(192,168,4,1);
 
 const uint8_t MAX_NUM_USER_SETTINGS = 3;
