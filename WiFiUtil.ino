@@ -267,6 +267,8 @@ void processPost()
       debugSerial.println(setting_to_save);
       #endif
     }
+
+    yield();
   }
 
   if(0 <= setting_to_load){
@@ -295,6 +297,7 @@ void sendChunkln(const __FlashStringHelper *str)
 {
   server.sendContent(str);
   server.sendContent("\n");
+  yield();
 }
 void sendChunkln()
 {
@@ -304,10 +307,12 @@ void sendChunkln()
 void sendChunk(const __FlashStringHelper *str)
 {
     server.sendContent(str);
+    yield();
 }
 void sendChunk(const char *str)
 {
   server.sendContent(str);
+  yield();
 }
 void sendChunk(int num)
 {

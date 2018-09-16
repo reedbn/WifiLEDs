@@ -99,6 +99,7 @@ void stripLoop()
       settings.patternLen = 1;//If zero, we run into loop problems
       break;
   }
+  yield();
   
   //Load the buffer with the next frame as appropriate
   switch(settings.animMode)
@@ -165,6 +166,7 @@ void Transition()
   //Save all of the current colors
   for(unsigned int i=0; i < numLEDs; ++i){
     LEDNow[i] = CRGB2Num(LEDs[i]);
+    yield();
   }
   
   switch(settings.transMode)
@@ -681,6 +683,7 @@ void Twinkle()
     for(int i=0; i<num_blocks; i++)
     {
       color_idx[i] = random(settings.patternLen);
+      yield();
     }
     
     for(int i=0; i<numLEDs; i++)
@@ -752,6 +755,7 @@ void resetStrip()
   {
     LEDs[i].setRGB(0,0,0);
     LEDNext[i] = 0;
+    yield();
   }
   strip->showLeds();
   
@@ -819,7 +823,8 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte r2 = (color2 >> 16);
   byte g2 = (color2 >>  8);
   byte b2 = (color2      );
-  
+
+  yield();
   if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2){
     fraction = (pow(2,fraction)-1);//Exponential
   }
@@ -830,6 +835,7 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte r = round(fraction*r1 + (1-fraction)*r2);
   byte g = round(fraction*g1 + (1-fraction)*g2);
   byte b = round(fraction*b1 + (1-fraction)*b2);
+  yield();
 
   return(RgbNum(r,g,b));
 }
