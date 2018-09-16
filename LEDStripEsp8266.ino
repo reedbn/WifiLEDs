@@ -39,11 +39,13 @@ void loop()
     stripLoop();
     stripLoopAllowed = false;
   }
+  yield();
   
   #if PRINT_DEBUGGING_WIFLY_DETAIL
   Serial.println(F("WiFi Loop..."));
   #endif
   wifiLoop();
+  yield();
 
   if(++loop_counter %10000 == 0){
     Serial.print(F("Loop "));
@@ -53,4 +55,5 @@ void loop()
   if(stripParamsUpdated){
     resetStrip();
   }
+  yield();
 }

@@ -214,6 +214,7 @@ void Transition()
           }
         }
         strip->showLeds();
+        yield();
       }
       break;
     }
@@ -250,6 +251,7 @@ void Transition()
           }
         }
         strip->showLeds();
+        yield();
       }
       for(int i=0; i<=numStepsInTrans/2; i++)
       {
@@ -265,6 +267,7 @@ void Transition()
           }
         }
         strip->showLeds();
+        yield();
       }
       break;
     }
@@ -732,6 +735,7 @@ void clearStrip()
     }
   }
   strip->showLeds();
+  yield();
 }
 
 void clearLEDNext()
@@ -758,6 +762,7 @@ void resetStrip()
     yield();
   }
   strip->showLeds();
+  yield();
   
   //Reset the IIR filter
   timeScaler.reset();
