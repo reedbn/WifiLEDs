@@ -33,6 +33,7 @@ void UpdateAvailabilityIndex()
       debugSerial.printf("Found value %d at index %d. Ignoring.\n",EEPROM.read(i*sizeof(settings_t)),i);
       #endif
     }
+    yield();
   }
   available_settings[available_index] = 0xFF;
   #if PRINT_DEBUGGING_SETTINGS
@@ -43,6 +44,7 @@ void UpdateAvailabilityIndex()
 void InitEeprom()
 {
   EEPROM.begin(sizeof(settings_t)*MAX_NUM_USER_SETTINGS);
+  yield();
   UpdateAvailabilityIndex();
   #if PRINT_DEBUGGING_SETTINGS
   debugSerial.println(F("EEPROM init complete"));
@@ -55,6 +57,7 @@ void LoadSetting(uint8_t setting_index, settings_t* setting_out)
   uint16_t eeprom_offset = sizeof(settings_t)*setting_index;
   for(uint32_t i = 0; i < sizeof(settings_t); ++i){
     dest[i] = EEPROM.read(eeprom_offset + i);
+    yield();
   }
   #if PRINT_DEBUGGING_SETTINGS
   debugSerial.print(F("Loaded setting from index "));
@@ -74,8 +77,11 @@ void SaveSetting(uint8_t setting_index)
   uint16_t eeprom_offset = sizeof(settings_t)*setting_index;
   for(uint32_t i = 0; i < sizeof(settings_t); ++i){
     EEPROM.write(eeprom_offset + i,src[i]);
+    yield();
   }
   EEPROM.commit();
+
+  yield();
 
   UpdateAvailabilityIndex();
 
@@ -89,6 +95,7 @@ void DeleteSetting(uint8_t setting_index)
 {
   EEPROM.write(sizeof(settings_t)*setting_index,0xFF);
   EEPROM.commit();
+  yield();
 
   #if PRINT_DEBUGGING_SETTINGS
   debugSerial.print(F("Erased setting from index "));

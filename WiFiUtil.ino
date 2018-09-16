@@ -31,6 +31,12 @@ void send404();
 
 void wifiSetup()
 {
+  //Set up the web server
+  server.on("/", HTTP_GET, handleRootGet);
+  server.on("/", HTTP_POST, handleRootPost);
+  server.onNotFound(send404);
+  server.begin();
+  
   //Ensure that we're in a reasonable state
   ESP.eraseConfig();
   WiFi.setAutoConnect(false);
@@ -55,12 +61,6 @@ void wifiSetup()
   Serial.print(F("AP IP address: "));
   Serial.println(myIP);
   #endif
-  
-  //Set up the web server
-  server.on("/", HTTP_GET, handleRootGet);
-  server.on("/", HTTP_POST, handleRootPost);
-  server.onNotFound(send404);
-  server.begin();
 
   #if PRINT_DEBUGGING_WIFLY
   Serial.println(F("Setup Complete"));

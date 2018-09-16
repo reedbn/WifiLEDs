@@ -19,12 +19,15 @@ void setup()
 
   //Set up EEPROM
   InitEeprom();
-  
-  //Set up WiFi
-  wifiSetup();
+  yield();
 
   //Set up strip
   stripSetup();
+  yield();
+
+  //Set up WiFi
+  wifiSetup();
+  yield();
 
   stripTicker.attach(1.0/STRIP_MAX_REFRESH_HZ,allowStripLoop);
 }

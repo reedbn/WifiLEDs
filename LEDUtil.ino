@@ -37,6 +37,7 @@ void stripSetup()
   #else
   strip = &FastLED.addLeds<LED_STRIP_TYPE,LEDdataPin>(LEDs, numLEDs);
   #endif
+  yield();
   
   //Initialize the LED sequence to be displayed
   int i = 0;
@@ -188,7 +189,7 @@ void Transition()
           return;
         }
       }
-      
+      yield();
       strip->showLeds();
       delay(settings.transTime);
       break;
@@ -213,6 +214,7 @@ void Transition()
             return;
           }
         }
+        yield();
         strip->showLeds();
         yield();
       }
@@ -250,6 +252,7 @@ void Transition()
             return;
           }
         }
+        yield();
         strip->showLeds();
         yield();
       }
@@ -266,6 +269,7 @@ void Transition()
             return;
           }
         }
+        yield();
         strip->showLeds();
         yield();
       }
@@ -734,6 +738,7 @@ void clearStrip()
       return;
     }
   }
+  yield();
   strip->showLeds();
   yield();
 }
