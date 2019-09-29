@@ -1,5 +1,5 @@
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#include <WebServer.h>
 
 #include "config.h"
 #include "settings.h"
@@ -11,7 +11,7 @@
 char wifiBuff[353];
 
 //Set up web server
-ESP8266WebServer server(80);//Port 80
+WebServer server(80);//Port 80
 
 //Externs
 extern const char* ssid;
@@ -31,22 +31,18 @@ void send404();
 
 void wifiSetup()
 {
-  //Set up the web server
-  server.on("/", HTTP_GET, handleRootGet);
-  server.on("/", HTTP_POST, handleRootPost);
-  server.onNotFound(send404);
-  server.begin();
-  
   //Ensure that we're in a reasonable state
-  ESP.eraseConfig();
+  #if PRINT_DEBUGGING_WIFLY
+  debugSerial.println("Reseting config");
+  #endif
   WiFi.setAutoConnect(false);
   WiFi.disconnect(true);
   
   //Set up the WiFi AP
+  #if PRINT_DEBUGGING_WIFLY
+  debugSerial.println("Configuring WiFi AP...");
+  #endif
   WiFi.mode(WIFI_AP);//AP mode
-  WiFi.softAPConfig(apIP,//Our IP
-                    apIP,//Gateway IP
-                    IPAddress(255,255,255,0));//Subnet mask
   #if PRINT_DEBUGGING_WIFLY
   debugSerial.println(
   #endif
@@ -55,6 +51,18 @@ void wifiSetup()
   ? F("SoftAP ready") : F("SoftAP failed"))
   #endif
   ;
+
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println("Wait 100 ms for AP_START...");
+  #endif
+  delay(100);
+
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println("Setting softAPConfig");
+  #endif
+  WiFi.softAPConfig(apIP,//Our IP
+                    apIP,//Gateway IP
+                    IPAddress(255,255,255,0));//Subnet mask
   
   IPAddress myIP = WiFi.softAPIP();
   #if PRINT_DEBUGGING_WIFLY
@@ -63,7 +71,19 @@ void wifiSetup()
   #endif
 
   #if PRINT_DEBUGGING_WIFLY
-  Serial.println(F("Setup Complete"));
+  debugSerial.println("Setting up WiFi server");
+  #endif
+  //Set up the web server
+  server.on("/", HTTP_GET, handleRootGet);
+  server.on("/", HTTP_POST, handleRootPost);
+  server.onNotFound(send404);
+  server.begin();
+  #if PRINT_DEBUGGING_WIFLY
+  debugSerial.println("Server setup complete");
+  #endif
+
+  #if PRINT_DEBUGGING_WIFLY
+  Serial.println(F("WiFi Setup Complete"));
   #endif
 }
 
@@ -268,8 +288,7 @@ void processPost()
       #endif
     }
 
-    yield();
-  }
+      }
 
   if(0 <= setting_to_load){
     #if PRINT_DEBUGGING_WIFLY
@@ -297,8 +316,7 @@ void sendChunkln(const __FlashStringHelper *str)
 {
   server.sendContent(str);
   server.sendContent("\n");
-  yield();
-}
+  }
 void sendChunkln()
 {
   server.sendContent("\n");
@@ -307,13 +325,11 @@ void sendChunkln()
 void sendChunk(const __FlashStringHelper *str)
 {
     server.sendContent(str);
-    yield();
-}
+    }
 void sendChunk(const char *str)
 {
   server.sendContent(str);
-  yield();
-}
+  }
 void sendChunk(int num)
 {
   sendChunk(itoa(num,wifiBuff,10));

@@ -31,14 +31,16 @@ uint32_t CRGB2Num(CRGB& c)
 
 void stripSetup()
 {
+  #if PRINT_DEBUGGING_LED
+  debugSerial.println(F("Setting up LEDs..."));
+  #endif
   //Initialize the strip driver
   #if(0 <= LED_CLOCK_PIN)
   strip = &FastLED.addLeds<LED_STRIP_TYPE,LEDdataPin,LED_CLOCK_PIN>(LEDs, numLEDs);
   #else
   strip = &FastLED.addLeds<LED_STRIP_TYPE,LEDdataPin>(LEDs, numLEDs);
   #endif
-  yield();
-  
+    
   //Initialize the LED sequence to be displayed
   int i = 0;
   settings.LEDSeq[i++] = RgbNum(  0,  0,  0);//black
@@ -100,8 +102,7 @@ void stripLoop()
       settings.patternLen = 1;//If zero, we run into loop problems
       break;
   }
-  yield();
-  
+    
   //Load the buffer with the next frame as appropriate
   switch(settings.animMode)
   {
@@ -121,8 +122,7 @@ void stripLoop()
   }
   
   //Software interrupt
-  yield();
-  if(stripParamsUpdated)
+    if(stripParamsUpdated)
   {
     return;
   }
@@ -134,8 +134,7 @@ void stripLoop()
   Transition();
   
   //Software interrupt
-  yield();
-  if(stripParamsUpdated)
+    if(stripParamsUpdated)
   {
     return;
   }
@@ -167,8 +166,7 @@ void Transition()
   //Save all of the current colors
   for(unsigned int i=0; i < numLEDs; ++i){
     LEDNow[i] = CRGB2Num(LEDs[i]);
-    yield();
-  }
+      }
   
   switch(settings.transMode)
   {
@@ -183,14 +181,12 @@ void Transition()
         LEDs[i] = LEDNext[i];
         
         //Software interrupt
-        yield();
-        if(stripParamsUpdated)
+                if(stripParamsUpdated)
         {
           return;
         }
       }
-      yield();
-      strip->showLeds();
+            strip->showLeds();
       delay(settings.transTime);
       break;
     }
@@ -208,16 +204,13 @@ void Transition()
           LEDs[j] = LinInterp(LEDNow[j],LEDNext[j],fraction);
           
           //Software interrupt
-          yield();
-          if(stripParamsUpdated)
+                    if(stripParamsUpdated)
           {
             return;
           }
         }
-        yield();
-        strip->showLeds();
-        yield();
-      }
+                strip->showLeds();
+              }
       break;
     }
     
@@ -246,16 +239,13 @@ void Transition()
           LEDs[j] = LinInterp(LEDNow[j],intermed_color,fraction);
           
           //Software interrupt
-          yield();
-          if(stripParamsUpdated)
+                    if(stripParamsUpdated)
           {
             return;
           }
         }
-        yield();
-        strip->showLeds();
-        yield();
-      }
+                strip->showLeds();
+              }
       for(int i=0; i<=numStepsInTrans/2; i++)
       {
         fraction = 1.0*(numStepsInTrans/2 - i)/(numStepsInTrans/2);
@@ -263,16 +253,13 @@ void Transition()
         {
           LEDs[j] = LinInterp(intermed_color,LEDNext[j],fraction);
           //Software interrupt
-          yield();
-          if(stripParamsUpdated)
+                    if(stripParamsUpdated)
           {
             return;
           }
         }
-        yield();
-        strip->showLeds();
-        yield();
-      }
+                strip->showLeds();
+              }
       break;
     }
   }
@@ -337,8 +324,7 @@ void None()
         }
         
         //Software interrupt
-        yield();
-        if(stripParamsUpdated)
+                if(stripParamsUpdated)
         {
           return;
         }
@@ -370,8 +356,7 @@ void None()
         }
         
         //Software interrupt
-        yield();
-        if(stripParamsUpdated)
+                if(stripParamsUpdated)
         {
           return;
         }
@@ -393,8 +378,7 @@ void None()
         //Do something?
       }
       //Software interrupt
-      yield();
-      if(stripParamsUpdated)
+            if(stripParamsUpdated)
       {
         return;
       }
@@ -449,8 +433,7 @@ void Scroll()
         }
         
         //Software interrupt
-        yield();
-        if(stripParamsUpdated)
+                if(stripParamsUpdated)
         {
           return;
         }
@@ -487,8 +470,7 @@ void Scroll()
         }
         
         //Software interrupt
-        yield();
-        if(stripParamsUpdated)
+                if(stripParamsUpdated)
         {
           return;
         }
@@ -515,8 +497,7 @@ void Scroll()
       }
       
       //Software interrupt
-      yield();
-      if(stripParamsUpdated)
+            if(stripParamsUpdated)
       {
         return;
       }
@@ -612,8 +593,7 @@ void Snake()
     }
     
     //Software interrupt
-    yield();
-    if(stripParamsUpdated)
+        if(stripParamsUpdated)
     {
       return;
     }
@@ -646,8 +626,7 @@ void Twinkle()
       }
       
       //Software interrupt
-      yield();
-      if(stripParamsUpdated)
+            if(stripParamsUpdated)
       {
         return;
       }
@@ -672,8 +651,7 @@ void Twinkle()
       }
         
       //Software interrupt
-      yield();
-      if(stripParamsUpdated)
+            if(stripParamsUpdated)
       {
         return;
       }
@@ -690,8 +668,7 @@ void Twinkle()
     for(int i=0; i<num_blocks; i++)
     {
       color_idx[i] = random(settings.patternLen);
-      yield();
-    }
+          }
     
     for(int i=0; i<numLEDs; i++)
     {
@@ -710,8 +687,7 @@ void Twinkle()
       }
       
       //Software interrupt
-      yield();
-      if(stripParamsUpdated)
+            if(stripParamsUpdated)
       {
         return;
       }
@@ -732,16 +708,13 @@ void clearStrip()
     LEDs[i].setRGB(0,0,0);
     
     //Software interrupt
-    yield();
-    if(stripParamsUpdated)
+        if(stripParamsUpdated)
     {
       return;
     }
   }
-  yield();
-  strip->showLeds();
-  yield();
-}
+    strip->showLeds();
+  }
 
 void clearLEDNext()
 {
@@ -750,8 +723,7 @@ void clearLEDNext()
     LEDNext[i] = 0;
     
     //Software interrupt
-    yield();
-    if(stripParamsUpdated)
+        if(stripParamsUpdated)
     {
       return;
     }
@@ -764,11 +736,9 @@ void resetStrip()
   {
     LEDs[i].setRGB(0,0,0);
     LEDNext[i] = 0;
-    yield();
-  }
+      }
   strip->showLeds();
-  yield();
-  
+    
   //Reset the IIR filter
   timeScaler.reset();
 
@@ -834,8 +804,7 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte g2 = (color2 >>  8);
   byte b2 = (color2      );
 
-  yield();
-  if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2){
+    if(r1+(uint32_t)g1+b1 > r2+(uint32_t)g2+b2){
     fraction = (pow(2,fraction)-1);//Exponential
   }
   else{
@@ -845,15 +814,10 @@ uint32_t LinInterp(uint32_t color1, uint32_t color2, float fraction)
   byte r = round(fraction*r1 + (1-fraction)*r2);
   byte g = round(fraction*g1 + (1-fraction)*g2);
   byte b = round(fraction*b1 + (1-fraction)*b2);
-  yield();
-
+  
   return(RgbNum(r,g,b));
 }
 
-extern "C" {
-#include "user_interface.h"
-}
 int freeRam () {
-  return system_get_free_heap_size();
+  return ESP.getFreeHeap();
 }
-

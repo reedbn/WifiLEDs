@@ -7,7 +7,7 @@
 
 #define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 
 //Initialization/hardware config
 #define LED_STRIP_TYPE NEOPIXEL
@@ -15,7 +15,7 @@ const int LEDdataPin = 2;
 #define LED_CLOCK_PIN (-1) //Set to -1 if not used
 const uint8_t numLEDs = 20;
 const uint8_t maxSeqLen = 11;
-const uint32_t STRIP_MAX_REFRESH_HZ = 60;
+//const uint32_t STRIP_MAX_REFRESH_HZ = 60;
 
 static const char* ssid = "RFish";
 static const char* pass = "NotUrFish";
